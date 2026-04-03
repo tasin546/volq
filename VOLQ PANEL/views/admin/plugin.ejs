@@ -1,0 +1,109 @@
+<%- include('../components/admin_addons_template') %>
+<div class="space-y-12">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Module Configuration</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Edit Plugin Manifest</h2>
+            <p class="text-zinc-500 text-sm font-medium">Modify the core behavioral parameters for this administrative extension.</p>
+        </div>
+        <div class="flex gap-4">
+            <button id="save-button" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest">
+                Save Changes
+            </button>
+            <button id="save-close-button" class="px-8 py-3 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-bold rounded-2xl transition uppercase tracking-widest">
+                Commit & Exit
+            </button>
+        </div>
+    </div>
+
+    <!-- Interface Card -->
+    <div class="liquid-glass rounded-[3rem] border border-white/5 shadow-3xl overflow-hidden group">
+        <div class="p-6 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">/plugins/<%= dir %>/manifest.json</span>
+            </div>
+            <div class="flex gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-white/5"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-white/5"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-white/5"></div>
+            </div>
+        </div>
+        <div id="editor" class="h-[600px] w-full bg-black/10"></div>
+    </div>
+</div>
+<!-- Close template shell div -->
+</div>
+<%- include('../components/footer') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
+<script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        monaco.editor.defineTheme('liquidTheme', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [
+                { token: 'string.key.json', foreground: '3b82f6' },
+                { token: 'string.value.json', foreground: '10b981' },
+                { token: 'number.json', foreground: '8b5cf6' },
+                { token: 'keyword.json', foreground: 'f43f5e' }
+            ],
+            colors: {
+                'editor.background': '#00000000',
+                'editor.lineHighlightBackground': '#ffffff05',
+                'editorCursor.foreground': '#3b82f6',
+                'editorBracketMatch.background': '#3b82f620',
+                'editorBracketMatch.border': '#3b82f6'
+            }
+        });
+
+        var editor = monaco.editor.create(document.getElementById('editor'), {
+            value: `<%- content %>`,
+            language: 'json',
+            theme: 'liquidTheme',
+            automaticLayout: true,
+            fontSize: 14,
+            fontFamily: "'JetBrains Mono', monospace",
+            minimap: { enabled: false },
+            padding: { top: 20 },
+            scrollBeyondLastLine: false,
+            roundedSelection: true,
+            cursorSmoothCaretAnimation: true,
+            smoothScrolling: true
+        });
+
+        async function saveData(closeAfter = false) {
+            const btn = closeAfter ? document.getElementById('save-close-button') : document.getElementById('save-button');
+            const originalText = btn.textContent;
+            btn.textContent = 'SYNCHRONIZING...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/admin/plugins/<%= dir %>/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: editor.getValue(), filename: 'manifest.json' })
+                });
+                if(res.ok) {
+                    if(closeAfter) window.location.href = '/admin/plugins';
+                    else {
+                        btn.textContent = 'COMMITTED';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        }, 2000);
+                    }
+                } else throw new Error();
+            } catch(e) {
+                alert('Commit failed.');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('save-button').onclick = () => saveData(false);
+        document.getElementById('save-close-button').onclick = () => saveData(true);
+    });
+</script>

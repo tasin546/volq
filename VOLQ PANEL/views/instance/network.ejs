@@ -1,0 +1,51 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Transmission Control</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Connectivity Matrix</h2>
+            <p class="text-zinc-500 text-sm font-medium">Provision and coordinate secure network endpoints for external ingress.</p>
+        </div>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Port Registry -->
+    <div class="liquid-glass rounded-[3rem] border border-white/5 shadow-3xl overflow-hidden relative">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/[0.02] border-b border-white/5">
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Public Endpoint</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Internal Mapping</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Protocol Attributes</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">State</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.02]">
+                    <% ports.forEach(function(port) { %>
+                        <tr class="hover:bg-white/[0.01] transition-colors group cursor-pointer">
+                            <td class="px-8 py-6">
+                                <span class="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl text-[11px] font-mono text-blue-400 font-bold tracking-widest"><%= port.port %></span>
+                            </td>
+                            <td class="px-8 py-6 text-xs font-bold text-zinc-400 font-mono tracking-tight"><%= port.internal %></td>
+                            <td class="px-8 py-6">
+                                <% if (port.primary == true) { %>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                                        <span class="text-[10px] font-black text-white uppercase tracking-widest">Primary Nexus Path</span>
+                                    </div>
+                                <% } else { %>
+                                    <span class="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em]">Secondary Tunnel</span>
+                                <% } %>
+                            </td>
+                            <td class="px-8 py-6 text-right text-[9px] font-black text-emerald-500 uppercase tracking-[0.3em] italic">Established</td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<%- include('../components/footer') %>

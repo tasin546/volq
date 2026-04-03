@@ -1,0 +1,156 @@
+<%- include('components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-4xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-3">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-1 tracking-tighter uppercase leading-none">Security Center</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Account Ecosystem</h2>
+                <p class="text-zinc-500 text-sm font-medium">Coordinate your identity and security protocols across the VOLQ infrastructure.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8">
+            <!-- Identity Section -->
+            <div class="liquid-glass rounded-[3rem] p-12 border border-white/5 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                
+                <div class="flex items-center gap-6 mb-12">
+                    <img class="w-16 h-16 rounded-[2rem] bg-zinc-800 border border-white/10 shadow-2xl" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="Avatar">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white leading-tight"><%= user.username %></h3>
+                        <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-1"><%= user.email %></p>
+                    </div>
+                </div>
+
+                <form id="change-username-form" action="/change-username" method="POST" class="space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.username %></label>
+                            <div class="relative group">
+                                <input id="username" type="text" name="username" placeholder="<%= user.username %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                                <div id="username-feedback" class="absolute -bottom-6 right-2 text-[9px] font-bold uppercase tracking-tighter text-zinc-600"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Email Address</label>
+                            <input type="email" value="<%= user.email %>" class="w-full px-6 py-4 bg-white/[0.01] border border-white/[0.02] rounded-2xl text-zinc-600 text-sm outline-none cursor-not-allowed" disabled>
+                        </div>
+                    </div>
+                    <button type="submit" id="change-username-btn" class="w-max px-10 py-4 bg-white/5 border border-white/10 text-white text-[10px] font-bold rounded-2xl transition hover:bg-white/10 hover:border-white/20 active:scale-95 uppercase tracking-widest disabled:opacity-30 disabled:pointer-events-none" disabled>
+                        Synchronize Identity
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Section -->
+            <div class="liquid-glass rounded-[3rem] p-12 border border-white/5 shadow-2xl space-y-12">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Security Protocol</h3>
+                </div>
+
+                <form id="change-password-form" action="/change-password" method="POST" class="space-y-8 max-w-2xl">
+                    <div class="space-y-6">
+                        <div class="relative">
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Legacy Access Credential</label>
+                            <input id="currentPassword" type="password" name="currentPassword" placeholder="••••••••" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                            <div id="current-password-feedback" class="absolute -bottom-6 right-2 text-[9px] font-bold uppercase tracking-tighter text-zinc-600"></div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">New Security Sequence</label>
+                            <input id="newPassword" type="password" name="newPassword" placeholder="••••••••" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all disabled:opacity-20 transition-opacity" disabled>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" id="change-password-btn" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest disabled:opacity-30 disabled:pointer-events-none" disabled>
+                            Authorize Update
+                        </button>
+
+                        <% if (user.twoFAEnabled !== true) { %>
+                            <button type="button" onclick="window.location.href = '/enable-2fa';" class="px-10 py-4 bg-white/[0.03] border border-white/10 text-white text-[10px] font-bold rounded-2xl transition hover:bg-white/10 active:scale-95 uppercase tracking-widest">
+                                Initialize 2FA
+                            </button>      
+                        <% } else { %>
+                            <form action="/disable-2fa" method="POST" class="inline">
+                                <button type="submit" class="px-10 py-4 bg-rose-500/10 border border-rose-500/20 text-rose-500 text-[10px] font-bold rounded-2xl transition hover:bg-rose-500 hover:text-white active:scale-95 uppercase tracking-widest">
+                                    Deactivate 2FA
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Shared logic preserved from original
+        const usernameInput = document.getElementById('username');
+        const changeUsernameBtn = document.getElementById('change-username-btn');
+        const usernameFeedback = document.getElementById('username-feedback');
+        
+        const currentPasswordInput = document.getElementById('currentPassword');
+        const newPasswordInput = document.getElementById('newPassword');
+        const changePasswordBtn = document.getElementById('change-password-btn');
+        const currentPasswordFeedback = document.getElementById('current-password-feedback');
+
+        // Username Check
+        let uTimeout;
+        usernameInput.oninput = () => {
+            clearTimeout(uTimeout);
+            usernameFeedback.textContent = 'Scanning...';
+            uTimeout = setTimeout(async () => {
+                const val = usernameInput.value.trim();
+                if(!val) { usernameFeedback.textContent = ''; return; }
+                const res = await fetch(`/check-username?username=${encodeURIComponent(val)}`);
+                const data = await res.json();
+                usernameFeedback.textContent = data.exists ? 'Identification Taken' : 'Sequence Available';
+                usernameFeedback.className = `absolute -bottom-6 right-2 text-[9px] font-bold uppercase tracking-tighter ${data.exists ? 'text-rose-500' : 'text-emerald-500'}`;
+                changeUsernameBtn.disabled = data.exists || val.toLowerCase() === '<%= user.username %>'.toLowerCase();
+            }, 500);
+        };
+
+        // Password Change Check
+        let pTimeout;
+        currentPasswordInput.oninput = () => {
+            clearTimeout(pTimeout);
+            currentPasswordFeedback.textContent = 'Validating Key...';
+            pTimeout = setTimeout(async () => {
+                const currentPassword = currentPasswordInput.value;
+                if(!currentPassword) { currentPasswordFeedback.textContent = ''; return; }
+                const res = await fetch('/validate-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword })
+                });
+                const data = await res.json();
+                currentPasswordFeedback.textContent = data.valid ? 'Key Verified' : 'Invalid Credential';
+                currentPasswordFeedback.className = `absolute -bottom-6 right-2 text-[9px] font-bold uppercase tracking-tighter ${data.valid ? 'text-emerald-500' : 'text-rose-500'}`;
+                newPasswordInput.disabled = !data.valid;
+            }, 500);
+        };
+
+        newPasswordInput.oninput = () => {
+            changePasswordBtn.disabled = !newPasswordInput.value;
+        };
+
+        // Submit logic preserved
+        document.getElementById('change-username-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const res = await fetch('/update-username', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentUsername: '<%= user.username %>', newUsername: usernameInput.value.trim() })
+            });
+            if(res.ok) window.location.href = '/login?err=UpdatedCredentials';
+            else alert('Handshake failed.');
+        };
+    });
+</script>
+<%- include('components/footer') %>

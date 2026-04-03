@@ -1,0 +1,195 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-10">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Access Management</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.users %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.usersDescription %></p>
+            </div>
+            <button id="createButton" type="button" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95">
+                <%= req.translations.createUserButton %>
+            </button>
+        </div>
+
+        <!-- Users Table Container -->
+        <div id="nodeTable" class="liquid-glass rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none"><%= req.translations.name %></th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none"><%= req.translations.email %></th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none"><%= req.translations.role %></th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none"><%= req.translations.verificationStatus %></th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.02]">
+                        <% users.forEach(function(user) { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <img class="w-10 h-10 rounded-2xl bg-zinc-800 border border-white/5 shadow-inner" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="Avatar">
+                                    <div class="space-y-0.5">
+                                        <p class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors"><%= user.username %></p>
+                                        <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest"><%= user.userId.substring(0, 8) %></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="px-3 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-medium text-zinc-400"><%= user.email %></span>
+                            </td>
+                            <td class="px-8 py-6">
+                                <% if (user.admin) { %>
+                                    <span class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-[10px] font-bold text-indigo-500 uppercase tracking-tighter leading-none"><%= req.translations.admin %></span>
+                                <% } else { %>
+                                    <span class="px-3 py-1 bg-zinc-500/10 border border-zinc-500/10 rounded-lg text-[10px] font-bold text-zinc-500 uppercase tracking-tighter leading-none"><%= req.translations.regularUserRole %></span>
+                                <% } %>
+                            </td>
+                            <td class="px-8 py-6">
+                                <% if (user.verified) { %>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest"><%= req.translations.verifiedStatus %></span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="flex items-center gap-2 opacity-50">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                                        <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest"><%= req.translations.unverifiedStatus %></span>
+                                    </div>
+                                <% } %>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <div class="flex justify-end gap-3 translate-x-2 group-hover:translate-x-0 transition-transform">
+                                    <a href="/admin/users/edit/<%= user.userId %>" class="p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-zinc-500 focus:outline-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </a>
+                                    <button class="removeButton p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all text-zinc-500 focus:outline-none" data-user-id="<%= user.userId %>">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% if (typeof pagination !== 'undefined' && pagination) { %>
+            <div class="p-6 bg-white/[0.02] border-t border-white/5">
+                <%- include('../components/pagination', { pagination }) %>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Create User Form -->
+        <div id="nodeForm" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="liquid-glass rounded-[3rem] p-12 border border-blue-500/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                
+                <h3 class="text-2xl font-bold text-white mb-8">Deploy New User Access</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.username %></label>
+                            <input id="userName" type="text" placeholder="<%= req.translations.usernamePlaceholder %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Email Address</label>
+                            <input id="email" type="email" placeholder="<%= req.translations.emailPlaceholder %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.passwordLabel %></label>
+                            <input id="userPass" type="password" placeholder="••••••••" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.role %></label>
+                                <select id="userAdmin" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all appearance-none">
+                                    <option value="false" class="bg-zinc-900"><%= req.translations.regularUserRole %></option>
+                                    <option value="true" class="bg-zinc-900"><%= req.translations.admin %></option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Verified</label>
+                                <select id="userVerified" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all appearance-none">
+                                    <option value="true" class="bg-zinc-900"><%= req.translations.true %></option>
+                                    <option value="false" class="bg-zinc-900" selected><%= req.translations.false %></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 flex gap-4 pt-8 border-t border-white/[0.03]">
+                    <button id="createNodeBtn" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95">
+                        Initialize Access
+                    </button>
+                    <button onclick="window.location.reload()" class="px-10 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white text-xs font-bold rounded-2xl transition">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById("createButton").addEventListener("click", function () {
+        const table = document.getElementById("nodeTable");
+        const form = document.getElementById("nodeForm");
+        const btn = document.getElementById("createButton");
+        
+        if (form.classList.contains("hidden")) {
+            table.classList.add("opacity-20", "pointer-events-none", "scale-95");
+            table.classList.add("transition-all", "duration-500");
+            form.classList.remove("hidden");
+            btn.textContent = "Back to List";
+            btn.classList.replace("bg-blue-600", "bg-zinc-700");
+        } else {
+            window.location.reload();
+        }
+    });
+
+    document.getElementById("createNodeBtn").addEventListener("click", function () {
+        const username = document.getElementById("userName").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("userPass").value;
+        const admin = document.getElementById("userAdmin").value === "true";
+        const verified = document.getElementById("userVerified").value === "true";
+
+        if(!username || !email || !password) return alert("Please fill in all required fields.");
+
+        fetch("/users/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password, admin, verified }),
+        })
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(() => {
+            alert('<%= req.translations.userCreatedSuccess %>');
+            window.location.reload();
+        })
+        .catch(() => alert('<%= req.translations.userCreateError %>'));
+    });
+
+    document.querySelectorAll('.removeButton').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            if ('<%= user.userId %>' === userId) return alert('<%= req.translations.userCannotDelete %>');
+            if (!confirm('<%= req.translations.userDeletingConfirmation %>')) return;
+
+            fetch('/user/delete', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            })
+            .then(res => res.ok ? window.location.reload() : alert('<%= req.translations.userDeletingError %>'));
+        });
+    });
+</script>
+<%- include('../components/footer') %>

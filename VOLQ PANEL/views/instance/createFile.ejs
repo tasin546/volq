@@ -1,0 +1,91 @@
+<%- include('../components/template') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.js"></script>
+
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <% let query = req.query.path ? '?path=' + req.query.path : ''; %>
+    
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-4 w-full">
+            <div class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Resource Generation</div>
+            <div class="flex items-center gap-4 w-full">
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none whitespace-nowrap">Provision File</h2>
+                <div class="flex-1 max-w-xl">
+                    <input id="filename" type="text" placeholder="untouched.js" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-[11px] font-black uppercase tracking-widest focus:ring-1 focus:ring-emerald-500/30 outline-none transition-all placeholder:text-zinc-800">
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-zinc-500 text-sm font-medium">
+                <span class="font-mono text-[11px] uppercase tracking-widest text-zinc-600">nexus://app/data/<%= req.query.path %></span>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="/instance/<%= req.params.id %>/files<%= query %>" class="px-8 py-3.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition active:scale-95">
+                Discard
+            </a>
+            <button id="saveButton" onclick="saveFile()" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-emerald-500/20 active:scale-95 flex items-center gap-3">
+                Initialize Resource
+            </button>
+        </div>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Editor Matrix -->
+    <div class="liquid-glass rounded-[3.5rem] border border-white/5 shadow-4xl overflow-hidden relative h-[700px] group transition-all duration-500 hover:border-white/10">
+        <div id="editor" class="h-full w-full"></div>
+        <div class="absolute bottom-6 right-8 px-4 py-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/5 text-[9px] font-black text-zinc-500 uppercase tracking-widest select-none pointer-events-none opacity-40">
+            Nexus Protocol v1.0.0 // Blank Stream
+        </div>
+    </div>
+</main>
+
+<script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
+        monaco.editor.defineTheme('nexus-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [],
+            colors: {
+                'editor.background': '#00000000',
+                'editor.lineHighlightBackground': '#ffffff05',
+                'editorCursor.foreground': '#10b981',
+                'editorIndentGuide.background': '#ffffff08',
+                'editorIndentGuide.activeBackground': '#10b98130'
+            }
+        });
+
+        window.editor = monaco.editor.create(document.getElementById('editor'), {
+            value: '',
+            language: 'javascript',
+            theme: 'nexus-dark',
+            automaticLayout: true,
+            fontSize: 14,
+            fontFamily: "'JetBrains Mono', monospace",
+            minimap: { enabled: true, opacity: 0.3 }
+        });
+    });
+
+    function saveFile() {
+        const btn = document.getElementById('saveButton');
+        const name = document.getElementById('filename').value.trim();
+        if(!name) return alert('NAME REQUIRED');
+        
+        btn.disabled = true;
+        btn.textContent = 'PROVISIONING...';
+        
+        fetch(`/instance/<%= req.params.id %>/files/create/${name}<%= query %>`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: window.editor.getValue() })
+        }).then(r => r.json()).then(d => {
+            btn.textContent = 'PROVISIONED';
+            setTimeout(() => window.location.href = `/instance/<%= req.params.id %>/files/view/${name}<%= query %>`, 1000);
+        }).catch(() => {
+            btn.disabled = false;
+            btn.textContent = 'FAILED';
+        });
+    }
+</script>
+<%- include('../components/footer') %>

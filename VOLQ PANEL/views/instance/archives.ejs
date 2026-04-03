@@ -1,0 +1,140 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Persistence Engine</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Temporal Archives</h2>
+            <p class="text-zinc-500 text-sm font-medium">Coordinate and manage snapshots of the application state for emergency rollback.</p>
+        </div>
+
+        <button onclick="createArchive()" class="px-8 py-3.5 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-purple-500/20 active:scale-95 flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Generate Snapshot
+        </button>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Archival Registry -->
+    <div class="liquid-glass rounded-[3rem] border border-white/5 shadow-3xl overflow-hidden relative">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/[0.02] border-b border-white/5">
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Snapshot Manifest</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Data Volume</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Temporal Origin</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.02]">
+                    <% if (archives.length === 0) { %>
+                        <tr>
+                            <td colspan="4" class="px-8 py-12 text-center text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em]">No temporal snapshots detected in the registry.</td>
+                        </tr>
+                    <% } %>
+                    <% archives.forEach(function(arc) { %>
+                        <tr class="hover:bg-white/[0.01] transition-colors group cursor-pointer">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-purple-500/10 border border-purple-500/20 rounded-xl flex items-center justify-center text-purple-500">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+                                    </div>
+                                    <span class="text-xs font-mono text-white tracking-tight">
+                                        <%
+                                            let name = arc.name.replace(req.params.id + '-', '');
+                                            let [hash, ...rest] = name.split('-');
+                                            let shortHash = hash.slice(0, 8) + '...';
+                                            let shortName = [shortHash, ...rest].join('-');
+                                        %>
+                                        <%= shortName %>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-[10px] font-black text-zinc-400 uppercase tracking-widest"><%= arc.size %></td>
+                            <td class="px-8 py-6 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]"><%= arc.lastUpdated %></td>
+                            <td class="px-8 py-6 text-right">
+                                <div class="flex justify-end gap-3">
+                                    <button onclick="restoreArchive('<%= arc.name %>')" class="px-6 py-2 bg-white/5 hover:bg-white text-zinc-400 hover:text-black text-[9px] font-black uppercase tracking-widest rounded-xl transition active:scale-95">Rollback</button>
+                                    <button onclick="deleteArchive('<%= arc.name %>')" class="px-6 py-2 bg-rose-600/10 hover:bg-rose-500 text-rose-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition active:scale-95">Purge</button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Archival Overlay -->
+<div id="loadingPopup" class="fixed inset-0 bg-[#0a0a0c]/80 backdrop-blur-md z-[60] hidden flex items-center justify-center p-6">
+    <div class="liquid-glass border border-white/5 p-12 rounded-[3.5rem] w-full max-w-md shadow-4xl space-y-10">
+        <div class="space-y-4 text-center">
+            <svg class="w-12 h-12 text-purple-500 animate-spin mx-auto mb-6" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div class="space-y-2">
+                <h3 class="text-2xl font-black text-white tracking-tight uppercase">Generating Snapshot</h3>
+                <p id="loadingMessage" class="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em]">Synchronizing Registry...</p>
+            </div>
+        </div>
+        <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+            <div id="loadingBar" class="h-full w-0 bg-purple-600 transition-all duration-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function createArchive() {
+        const popup = document.getElementById('loadingPopup');
+        const bar = document.getElementById('loadingBar');
+        const msg = document.getElementById('loadingMessage');
+        
+        popup.classList.remove('hidden');
+        popup.classList.add('flex');
+        
+        try {
+            const res = await fetch(`/instance/<%= req.params.id %>/archives/create`, { method: 'POST' });
+            let prog = 0;
+            const iv = setInterval(() => {
+                if(prog < 95) {
+                    prog += Math.random() * 15;
+                    bar.style.width = Math.min(prog, 95) + '%';
+                    msg.textContent = `ARCHIVING DATA STREAM... ${Math.floor(prog)}%`;
+                }
+            }, 300);
+
+            if(res.ok) {
+                setTimeout(() => {
+                    clearInterval(iv);
+                    bar.style.width = '100%';
+                    msg.textContent = 'RESTORE POINT CREATED';
+                    setTimeout(() => window.location.reload(), 1000);
+                }, 1500);
+            }
+        } catch(e) { popup.classList.add('hidden'); }
+    }
+
+    async function restoreArchive(name) {
+        if(!confirm(`Initiate rollback to ${name}? All current uncommitted data will represent a rift.`)) return;
+        const res = await fetch(`/instance/<%= req.params.id %>/archives/rollback/${encodeURIComponent(name)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ archivename: name })
+        });
+        if(res.ok) { alert('ROLLBACK SUCCESSFUL'); window.location.reload(); }
+    }
+
+    async function deleteArchive(name) {
+        if(!confirm(`Purge snapshot ${name}? This action is final.`)) return;
+        const res = await fetch(`/instance/<%= req.params.id %>/archives/delete/${encodeURIComponent(name)}`, {
+            method: 'POST',
+            body: JSON.stringify({ archivename: name })
+        });
+        if(res.ok) window.location.reload();
+    }
+</script>
+<%- include('../components/footer') %>

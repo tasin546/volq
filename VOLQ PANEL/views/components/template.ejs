@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name || 'VOLQ' %></title>
+    <link rel="icon" href="/assets/logo.png" type="image/png">
+    <link rel="shortcut icon" href="/assets/logo.png" type="image/png">
+
+
+    
+    <meta content="<%= ogTitle %>" property="og:title">
+    <meta content="<%= ogDescription %>" property="og:description">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,400,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-active: rgba(59, 130, 246, 0.12);
+            --accent-blue: #3b82f6;
+            --base-bg: #111114;
+        }
+
+        body {
+            font-family: 'General Sans', sans-serif;
+            background-color: var(--base-bg);
+            background-image: 
+                radial-gradient(circle at 85% 15%, rgba(59, 130, 246, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 15% 85%, rgba(37, 99, 235, 0.04) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: #f4f4f5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .sidebar {
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            border-left: none;
+        }
+
+        [data-sidebar-direction="right"] .sidebar {
+            border-right: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-item-glass {
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        
+        .nav-item-glass:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            transform: translateX(8px);
+        }
+
+        .nav-item-glass.active {
+            background: var(--glass-active);
+            color: #fff;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        /* Shine effect */
+        .glass-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-shine::after {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+            transform: rotate(45deg);
+            transition: 0.8s ease-in-out;
+        }
+        .glass-shine:hover::after {
+            left: 150%;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 20px; }
+
+        img.no-drag {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            -webkit-user-select: none;
+            user-select: none;
+            pointer-events: none;
+        }
+        a img.no-drag { pointer-events: none; }
+        a:has(img.no-drag) { pointer-events: auto; }
+
+        .loading-spin svg {
+            fill: #868686;
+        }
+        @keyframes pulse-loader {
+            50% { fill: #868686; }
+            to { fill: rgba(134,134,134,.4); }
+        }
+        .loading-spin svg path {
+            animation: pulse-loader 1s infinite linear;
+        }
+    </style>
+</head>
+<body data-sidebar-direction="<%= theme['sidebar-direction'] || 'left' %>" class="flex h-full overflow-hidden <%= theme['sidebar-direction'] === 'right' ? 'flex-row-reverse' : '' %>">
+    <!-- Loader -->
+    <div id="loader" class="fixed inset-0 flex items-center justify-center bg-[#111114] z-[100] transition-opacity duration-500">
+        <div class="loading-spin">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 27 27" fill="currentColor">
+                <path d="M18.696,10.5c-0.275-0.479-0.113-1.09,0.365-1.367l4.759-2.751c0.482-0.273,1.095-0.11,1.37,0.368 c0.276,0.479,0.115,1.092-0.364,1.364l-4.764,2.751C19.583,11.141,18.973,10.977,18.696,10.5z" style="animation-delay: 0s;"/>
+                <path d="M16.133,6.938l2.75-4.765c0.276-0.478,0.889-0.643,1.367-0.366c0.479,0.276,0.641,0.886,0.365,1.366l-2.748,4.762 C17.591,8.415,16.979,8.58,16.5,8.303C16.021,8.027,15.856,7.414,16.133,6.938z" style="animation-delay: -0.083s;"/>
+                <path d="M13.499,7.5c-0.552,0-1-0.448-1-1.001V1c0-0.554,0.448-1,1-1c0.554,0,1.003,0.447,1.003,1v5.499 C14.5,7.053,14.053,7.5,13.499,7.5z" style="animation-delay: -0.166s;"/>
+                <path d="M8.303,10.5c-0.277,0.477-0.888,0.641-1.365,0.365L2.175,8.114C1.697,7.842,1.532,7.229,1.808,6.75 c0.277-0.479,0.89-0.642,1.367-0.368l4.762,2.751C8.416,9.41,8.58,10.021,8.303,10.5z" style="animation-delay: -0.249s;"/>
+                <path d="M9.133,7.937l-2.75-4.763c-0.276-0.48-0.111-1.09,0.365-1.366c0.479-0.277,1.09-0.114,1.367,0.366l2.75,4.765 c0.274,0.476,0.112,1.088-0.367,1.364C10.021,8.581,9.409,8.415,9.133,7.937z" style="animation-delay: -0.332s;"/>
+                <path d="M6.499,14.5H1c-0.554,0-1-0.448-1-1c0-0.554,0.447-1.001,1-1.001h5.499c0.552,0,1.001,0.448,1.001,1.001 C7.5,14.052,7.052,14.5,6.499,14.5z" style="animation-delay: -0.415s;"/>
+                <path d="M8.303,16.502c0.277,0.478,0.113,1.088-0.365,1.366l-4.762,2.749c-0.478,0.273-1.091,0.112-1.368-0.366 c-0.276-0.479-0.111-1.089,0.367-1.368l4.762-2.748C7.415,15.856,8.026,16.021,8.303,16.502z" style="animation-delay: -0.498s;"/>
+                <path d="M10.866,20.062l-2.75,4.767c-0.277,0.475-0.89,0.639-1.367,0.362c-0.477-0.277-0.642-0.886-0.365-1.365l2.75-4.764 c0.277-0.477,0.888-0.638,1.366-0.365C10.978,18.974,11.141,19.585,10.866,20.062z" style="animation-delay: -0.581s;"/>
+                <path d="M13.499,19.502c0.554,0,1.003,0.448,1.003,1.002v5.498c0,0.55-0.448,0.999-1.003,0.999c-0.552,0-1-0.447-1-0.999v-5.498 C12.499,19.95,12.946,19.502,13.499,19.502z" style="animation-delay: -0.664s;"/>
+                <path d="M17.867,19.062l2.748,4.764c0.275,0.479,0.113,1.088-0.365,1.365c-0.479,0.276-1.091,0.112-1.367-0.362l-2.75-4.767 c-0.276-0.477-0.111-1.088,0.367-1.365C16.979,18.424,17.591,18.585,17.867,19.062z" style="animation-delay: -0.747s;"/>
+                <path d="M18.696,16.502c0.276-0.48,0.887-0.646,1.365-0.367l4.765,2.748c0.479,0.279,0.64,0.889,0.364,1.368 c-0.275,0.479-0.888,0.64-1.37,0.366l-4.759-2.749C18.583,17.59,18.421,16.979,18.696,16.502z" style="animation-delay: -0.83s;"/>
+                <path d="M25.998,12.499h-5.501c-0.552,0-1.001,0.448-1.001,1.001c0,0.552,0.447,1,1.001,1h5.501c0.554,0,1.002-0.448,1.002-1 C27,12.946,26.552,12.499,25.998,12.499z" style="animation-delay: -0.913s;"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar w-68 flex-shrink-0 flex-col z-50 fixed lg:relative inset-y-0 left-0 -translate-x-full lg:translate-x-0 transition-transform duration-300 lg:flex">
+        <div class="p-8 pb-10">
+            <a href="/" class="flex items-center gap-4 group cursor-pointer">
+                <img src="/assets/logo.png" alt="Logo" class="w-12 h-12 rounded-[1.3rem] shadow-2xl shadow-blue-600/30 group-hover:scale-105 transition-all no-drag" draggable="false" ondragstart="return false" oncontextmenu="return false">
+
+                <div class="space-y-0.5">
+                    <h1 class="font-bold text-xl tracking-tight text-white/90"><%= name || 'VOLQ' %></h1>
+                    <div class="flex items-center gap-1.5 opacity-60">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span class="text-[9px] text-zinc-300 font-bold uppercase tracking-[0.2em]">Panel Control</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 overflow-y-auto pt-4">
+            <div class="mb-4 px-5">
+                <span class="text-[10px] font-bold text-zinc-700 uppercase tracking-widest leading-none">Management</span>
+            </div>
+            
+            <a href="/instances" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/instances' ? 'active' : '' %>">
+                <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </div>
+                <span class="text-xs font-semibold"><%= req.translations.instances %></span>
+            </a>
+            <a href="/account" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/account' ? 'active' : '' %>">
+                <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                </div>
+                <span class="text-xs font-semibold"><%= req.translations.account %></span>
+            </a>
+
+            <% if (user.admin == true) { %>
+            <div class="pt-10">
+                <div class="mb-4 px-5">
+                    <span class="text-[10px] font-bold text-zinc-700 uppercase tracking-widest leading-none">Administration</span>
+                </div>
+                <a href="/admin/overview" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/overview' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-wide"><%= req.translations.overview %></span>
+                </a>
+                <a href="/admin/settings" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path.startsWith('/admin/settings') ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.settings %></span>
+                </a>
+                <a href="/admin/analytics" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/analytics' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.analytics %></span>
+                </a>
+                <a href="/admin/users" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/users' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.users %></span>
+                </a>
+                <a href="/admin/instances" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/instances' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.instances %></span>
+                </a>
+                <a href="/admin/nodes" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/nodes' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.nodes %></span>
+                </a>
+                <a href="/admin/images" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/images' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.images %></span>
+                </a>
+                <a href="/admin/apikeys" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/apikeys' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.APIKeys %></span>
+                </a>
+                <a href="/admin/auditlogs" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/auditlogs' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.auditLogs %></span>
+                </a>
+                <a href="/admin/plugins" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === '/admin/plugins' ? 'active' : '' %>">
+                    <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 00-1 1v1a2 2 0 11-4 0v-1a1 1 0 00-1-1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>
+                    </div>
+                    <span class="text-xs font-semibold"><%= req.translations.plugins %></span>
+                </a>
+            </div>
+            <% } %>
+
+            <!-- Plugin items -->
+            <% if (plugins && plugins.length > 0) { %>
+            <div class="pt-6">
+                <div class="mb-4 px-5">
+                    <span class="text-[10px] font-bold text-zinc-700 uppercase tracking-widest leading-none">Extensions</span>
+                </div>
+                <% plugins.forEach(plugin => { %>
+                    <% if (plugin.sidebar) { %>
+                        <% Object.entries(plugin.sidebar).forEach(([key, value]) => { %>
+                            <a href="<%= value.url %>" class="nav-item-glass flex items-center gap-4 px-5 py-3.5 rounded-2xl text-zinc-500 group <%= req.path === value.url ? 'active' : '' %>">
+                                <div class="p-2 rounded-xl bg-white/2 border border-white/5 transition-all group-hover:border-white/20">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                                </div>
+                                <span class="text-xs font-semibold"><%= key %></span>
+                            </a>
+                        <% }); %>
+                    <% } %>
+                <% }); %>
+            </div>
+            <% } %>
+        </nav>
+
+        <!-- Profile Section -->
+        <div class="p-6 border-t border-white/5">
+            <div class="p-4 rounded-3xl bg-white/[0.01] border border-white/5 flex items-center gap-4 group cursor-pointer hover:bg-white/[0.04] transition-all">
+                <img class="w-10 h-10 rounded-2xl bg-zinc-800 border border-white/5" src="https://api.dicebear.com/9.x/thumbs/svg?seed=<%= user.username %>" alt="Avatar">
+                <div class="min-w-0">
+                    <p class="text-[11px] font-bold text-white/90 truncate capitalize"><%= user.username %></p>
+                    <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.1em]">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Layout wrapper -->
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+        <!-- Topbar -->
+        <header class="h-16 flex items-center justify-between px-4 sm:px-10 z-40 bg-black/10 backdrop-blur-3xl border-b border-white/[0.03]">
+            <button onclick="toggleSidebar()" class="lg:hidden p-2 text-zinc-400 hover:text-white transition mr-2 flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div class="relative w-full max-sm px-4">
+                <span class="absolute inset-y-0 left-4 pl-4 flex items-center pointer-events-none text-zinc-700">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </span>
+                <input id="searchInput" type="text" class="block w-full pl-10 pr-4 py-1.5 border border-white/5 rounded-2xl bg-white/[0.02] text-zinc-200 text-xs focus:ring-1 focus:ring-blue-500/20 outline-none transition-all placeholder:text-zinc-700" placeholder="<%= req.translations.search %>">
+                <div id="searchResults" class="absolute bg-[#18181b] w-full rounded-2xl shadow-2xl hidden mt-2 z-50 border border-white/10 p-2 max-h-96 overflow-y-auto"></div>
+            </div>
+            
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-10 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] hidden md:flex">
+                    <a href="https://volq.xyz/" target="_blank" class="hover:text-blue-400 transition">Docs</a>
+                    <a href="https://discord.gg/cdKMGPdpJB" target="_blank" class="hover:text-blue-400 transition">Discord</a>
+                </div>
+                <a href="/auth/logout" class="px-7 py-2 bg-white hover:bg-zinc-100 text-zinc-950 text-[11px] font-bold rounded-2xl transition shadow-xl shadow-white/5 active:scale-95 whitespace-nowrap flex-shrink-0">Sign Out</a>
+            </div>
+        </header>
+
+        <!-- Dynamic Content area -->
+        <div id="content" class="flex-1 overflow-y-auto scroll-smooth transition-opacity duration-300">
+
+    <div id="statusModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xl z-[100] flex justify-center items-center p-6 animate-in fade-in duration-300">
+        <div class="liquid-glass rounded-[4rem] p-16 max-w-lg w-full border border-white/5 shadow-4xl text-center space-y-10 relative overflow-hidden">
+            <div id="modalGlow" class="absolute -right-16 -top-16 w-64 h-64 opacity-20 rounded-full blur-[80px]"></div>
+            <div id="modalIcon" class="w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto border transition-all duration-500"></div>
+            <div class="space-y-4">
+                <h3 id="modalTitle" class="text-3xl font-black text-white tracking-tight leading-none uppercase"></h3>
+                <p id="modalMsg" class="text-zinc-500 text-sm font-medium leading-relaxed max-w-xs mx-auto"></p>
+            </div>
+            <button id="closeModalBtn" class="w-full py-5 bg-white hover:bg-zinc-100 text-black font-black text-[10px] uppercase tracking-[0.2em] rounded-3xl transition active:scale-95 shadow-3xl">Dismiss Communication</button>
+        </div>
+    </div>
+
+    <script>
+        function showStatusModal(title, msg, type = 'success') {
+            const modal = document.getElementById('statusModal');
+            const icon = document.getElementById('modalIcon');
+            const glow = document.getElementById('modalGlow');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMsg');
+            const btn = document.getElementById('closeModalBtn');
+
+            titleEl.textContent = title;
+            msgEl.textContent = msg;
+            
+            if(type === 'success') {
+                icon.className = "w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto border border-emerald-500/20 bg-emerald-500/10 text-emerald-500";
+                icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
+                glow.className = "absolute -right-16 -top-16 w-64 h-64 bg-emerald-600 rounded-full blur-[80px] opacity-20";
+            } else {
+                icon.className = "w-24 h-24 rounded-[2.5rem] flex items-center justify-center mx-auto border border-rose-500/20 bg-rose-500/10 text-rose-500";
+                icon.innerHTML = '<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+                glow.className = "absolute -right-16 -top-16 w-64 h-64 bg-rose-600 rounded-full blur-[80px] opacity-20";
+            }
+
+            modal.classList.remove('hidden');
+            btn.onclick = () => modal.classList.add('hidden');
+        }
+        window.alert = function(msg) { showStatusModal('System Message', msg, 'success'); };
+    </script>

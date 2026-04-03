@@ -1,0 +1,101 @@
+<%- include('../../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-10">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Mail Gateway</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">SMTP Configuration</h2>
+                <p class="text-zinc-500 text-sm font-medium">Configure and validate your outbound communication bridge for notifications and security alerts.</p>
+            </div>
+        </div>
+
+        <%- include('../../components/settings') %>
+
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            <!-- Main Configuration -->
+            <div class="xl:col-span-8 liquid-glass rounded-[3rem] p-12 border border-white/5 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                
+                <h3 class="text-xl font-bold text-white mb-8">Server Parameters</h3>
+
+                <form action="/admin/settings/saveSmtpSettings" method="POST" class="space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.smtpServer %></label>
+                            <input type="text" name="smtpServer" value="<%= smtpSettings.server || '' %>" placeholder="smtp.provider.host" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700" required>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.smtpPort %></label>
+                            <input type="number" name="smtpPort" value="<%= smtpSettings.port || '' %>" placeholder="587" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/[0.03]">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.smtpUsername %></label>
+                            <input type="text" name="smtpUser" value="<%= smtpSettings.username || '' %>" placeholder="postmaster@yourdomain.com" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700" required>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.smtpPassword %></label>
+                            <input type="password" name="smtpPass" value="<%= smtpSettings.password || '' %>" placeholder="••••••••••••••••" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/[0.03]">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.mailFromName %></label>
+                            <input type="text" name="smtpFromName" value="<%= smtpSettings.fromName || '' %>" placeholder="VOLQ Infrastructure" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700" required>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2"><%= req.translations.mailFromAddress %></label>
+                            <input type="email" name="smtpFromAddress" value="<%= smtpSettings.fromAddress || '' %>" placeholder="no-reply@volq.xyz" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700" required>
+                        </div>
+                    </div>
+
+                    <div class="pt-8 flex justify-between items-center">
+                        <button type="submit" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest">
+                            <%= req.translations.saveSmtpSettings %>
+                        </button>
+                        <% if (req.query.msg === "SmtpSaveSuccess") { %>
+                            <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest animate-pulse">Configuration Locked</span>
+                        <% } %>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Diagnostics -->
+            <div class="xl:col-span-4 space-y-6">
+                <div class="liquid-glass rounded-[2rem] p-10 border border-white/5 relative overflow-hidden group h-full">
+                    <div class="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500/5 rounded-full blur-[100px]"></div>
+                    <h4 class="text-xs font-bold text-white mb-6">Interface Validation</h4>
+                    <p class="text-xs text-zinc-500 leading-relaxed mb-8">Send a test synchronization packet to verify your SMTP relay authority.</p>
+                    
+                    <form action="/sendTestEmail" method="POST" class="space-y-6">
+                        <div>
+                            <label class="text-[9px] font-bold text-zinc-700 uppercase tracking-[0.2em] block mb-2 ml-1">Recipient Authorized Email</label>
+                            <input type="email" name="recipientEmail" class="w-full px-5 py-3.5 bg-white/[0.02] border border-white/5 rounded-xl text-white text-xs focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all" required>
+                        </div>
+                        <button type="submit" class="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-500 text-[10px] font-bold rounded-xl transition hover:bg-emerald-600 hover:text-white active:scale-95 uppercase tracking-widest">
+                            <%= req.translations.sendTestEmail %>
+                        </button>
+                    </form>
+
+                    <% if (req.query.msg === "TestemailSentsuccess") { %>
+                        <div class="mt-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3">
+                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]"></div>
+                            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Packet Delivered</span>
+                        </div>
+                    <% } %>
+                    <% if (req.query.err === "TestemailSentfailed") { %>
+                        <div class="mt-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3">
+                            <div class="w-1.5 h-1.5 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.5)]"></div>
+                            <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Handshake Failed</span>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<%- include('../../components/footer') %>

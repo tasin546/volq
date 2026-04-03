@@ -1,0 +1,56 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">External Ingress</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Transport Protocol</h2>
+            <p class="text-zinc-500 text-sm font-medium">Coordinate secure file transfer sessions via encrypted FTP tunnels.</p>
+        </div>
+
+        <button onclick="loginToWinSCP()" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-blue-500/20 active:scale-95 flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Initialize Connection
+        </button>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Credential Matrix -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group hover:border-blue-500/20 transition-all cursor-pointer" onclick="navigator.clipboard.writeText('ftp://<%- loginData.host %>:<%- loginData.port %>')">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-blue-600/5 rounded-full blur-[60px]"></div>
+            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Gateway Alias</span>
+            <span class="text-xl font-black text-white tracking-widest block font-mono">ftp://<%- loginData.host %>:<%- loginData.port %></span>
+        </div>
+
+        <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group hover:border-emerald-500/20 transition-all cursor-pointer" onclick="navigator.clipboard.writeText('<%- loginData.username %>')">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-600/5 rounded-full blur-[60px]"></div>
+            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Operator Token</span>
+            <span class="text-xl font-black text-white tracking-widest block font-mono"><%- loginData.username %></span>
+        </div>
+
+        <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group hover:border-rose-500/20 transition-all cursor-pointer" onclick="navigator.clipboard.writeText('<%- loginData.password %>')">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-rose-600/5 rounded-full blur-[60px]"></div>
+            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Access Cipher</span>
+            <span class="text-xl font-black text-white tracking-widest block font-mono blur-[6px] group-hover:blur-0 transition-all duration-300"><%- loginData.password %></span>
+        </div>
+    </div>
+
+    <!-- Security Advisory -->
+    <div class="liquid-glass p-10 rounded-[3rem] border border-white/5 shadow-2xl space-y-4">
+        <div class="flex items-center gap-3 text-amber-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span class="text-[10px] font-black uppercase tracking-[0.2em]">Atmospheric Relay Advisory</span>
+        </div>
+        <p class="text-zinc-500 text-xs font-medium leading-relaxed max-w-2xl">Use your preferred transport client (FileZilla, WinSCP, Cyberduck) to connect via the provided coordinates. Avoid transmitting over unsecured open networks.</p>
+    </div>
+</main>
+
+<script>
+    function loginToWinSCP() {
+        const url = `ftp://<%- loginData.username %>:<%- loginData.password %>@<%- loginData.host %>:<%- loginData.port %>`;
+        window.location.href = url;
+    }
+</script>
+<%- include('../components/footer') %>

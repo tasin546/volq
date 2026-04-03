@@ -1,0 +1,290 @@
+<%- include('../components/template') %>
+<main class="p-4 sm:p-8 lg:p-16 space-y-8 lg:space-y-12" id="content">
+    <%
+       function formatLastUpdated(dateString) {
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffTime = Math.abs(now - date);
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays > 30 ? date.toLocaleDateString() : `${diffDays}d ago`;
+       }
+    %>
+
+    <!-- Header & Action Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Resource Explorer</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">File System</h2>
+            <div class="flex items-center gap-4 text-zinc-500 text-sm font-medium">
+                <span class="font-mono text-[11px] uppercase tracking-widest text-zinc-600 truncate max-w-[300px]">/app/data/<%= req.query.path || '' %></span>
+                <span class="w-px h-3 bg-white/10"></span>
+                <span id="diskUsage" class="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Calculating...</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 w-full lg:w-auto">
+            <div class="relative flex-1 lg:flex-none lg:min-w-[300px]">
+                <div class="absolute inset-y-0 left-5 flex items-center text-zinc-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+                <input type="text" id="searchInput2" placeholder="Search registry..." class="w-full pl-12 pr-6 py-3.5 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-[11px] focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700 font-bold uppercase tracking-widest">
+            </div>
+            
+            <% let query = req.query.path ? '?path=' + req.query.path : ''; %>
+            <div class="flex flex-wrap gap-3">
+                <button id="uploadBtn" class="px-5 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-2xl transition shadow-3xl shadow-blue-500/20 active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    Upload
+                </button>
+                <a href="/instance/<%= req.params.id %>/files/create<%= query %>" class="px-5 py-3.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-2xl transition active:scale-95 flex items-center gap-2">
+                    New File
+                </a>
+                <a href="/instance/<%= req.params.id %>/files/folder/create<%= query %>" class="px-5 py-3.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-2xl transition active:scale-95 flex items-center gap-2">
+                    New Folder
+                </a>
+                <button onclick="createArchive()" class="px-5 py-3.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-black uppercase tracking-[0.15em] rounded-2xl transition active:scale-95 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                    Archive
+                </button>
+            </div>
+            <input type="file" id="fileInput" multiple class="hidden">
+        </div>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- File Registry -->
+    <div class="liquid-glass rounded-[3rem] border border-white/5 shadow-3xl overflow-hidden relative">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/[0.02] border-b border-white/5">
+                        <th class="px-8 py-5 w-16">
+                            <input type="checkbox" id="selectAll" class="w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-0 cursor-pointer">
+                        </th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Resource Name</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Dimension</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Temporal Drift</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.02]">
+                    <% files.filter(f => f.isDirectory).forEach(function(dir) { %>
+                        <tr class="hover:bg-white/[0.01] transition-colors group cursor-pointer">
+                            <td class="px-8 py-4">
+                                <input type="checkbox" class="file-checkbox w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-0 cursor-pointer" data-filename="<%= dir.name %>">
+                            </td>
+                            <td class="px-8 py-4">
+                                <a href="/instance/<%= req.params.id %>/files?path=<%= req.query.path ? req.query.path + '/' : '' %><%= dir.name %>" class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-center justify-center text-blue-500">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-white uppercase tracking-tight group-hover:text-blue-400 transition-colors"><%= dir.name %></span>
+                                </a>
+                            </td>
+                            <td class="px-8 py-4">
+                                <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Directory</span>
+                            </td>
+                            <td class="px-8 py-4">
+                                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest"><%= formatLastUpdated(dir.lastUpdated) %></span>
+                            </td>
+                            <td class="px-8 py-4 text-right">
+                                <div class="relative inline-block text-left">
+                                    <button onclick="toggleDropdown(event, '<%= dir.name %>')" class="p-2 text-zinc-600 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/></svg>
+                                    </button>
+                                    <div id="dropdown-<%= dir.name %>" class="hidden absolute right-0 mt-2 w-48 liquid-glass border border-white/5 rounded-2xl shadow-3xl z-50 overflow-hidden">
+                                        <button onclick="openRenameModal('<%= dir.name %>')" class="w-full px-6 py-4 text-left text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest">Rename</button>
+                                        <button onclick="openDeleteModal('<%= dir.name %>')" class="w-full px-6 py-4 text-left text-[10px] font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all uppercase tracking-widest">Decommission</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+
+                    <% files.filter(f => !f.isDirectory).forEach(function(file) { %>
+                        <tr class="hover:bg-white/[0.01] transition-colors group cursor-pointer">
+                            <td class="px-8 py-4">
+                                <input type="checkbox" class="file-checkbox w-4 h-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-0 cursor-pointer" data-filename="<%= file.name %>">
+                            </td>
+                            <td class="px-8 py-4">
+                                <a href="/instance/<%= req.params.id %>/files/view/<%= file.name %><%= query %>" class="flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-zinc-500/10 border border-white/5 rounded-xl flex items-center justify-center text-zinc-500">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-white uppercase tracking-tight group-hover:text-blue-400 transition-colors"><%= file.name %></span>
+                                </a>
+                            </td>
+                            <td class="px-8 py-4">
+                                <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest"><%= file.size %></span>
+                            </td>
+                            <td class="px-8 py-4">
+                                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest"><%= formatLastUpdated(file.lastUpdated) %></span>
+                            </td>
+                            <td class="px-8 py-4 text-right">
+                                <div class="relative inline-block text-left">
+                                    <button onclick="toggleDropdown(event, '<%= file.name %>')" class="p-2 text-zinc-600 hover:text-white transition-colors">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/></svg>
+                                    </button>
+                                    <div id="dropdown-<%= file.name %>" class="hidden absolute right-0 mt-2 w-48 liquid-glass border border-white/5 rounded-2xl shadow-3xl z-50 overflow-hidden">
+                                        <button onclick="openRenameModal('<%= file.name %>')" class="w-full px-6 py-4 text-left text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest">Rename</button>
+                                        <button onclick="downloadFile('<%= file.name %>')" class="w-full px-6 py-4 text-left text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest">Download</button>
+                                        <button onclick="openDeleteModal('<%= file.name %>')" class="w-full px-6 py-4 text-left text-[10px] font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all uppercase tracking-widest">Decommission</button>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Floating Action Protocol -->
+    <div id="floatingActionBar" class="fixed bottom-12 left-1/2 -translate-x-1/2 liquid-glass border border-white/5 px-10 py-5 rounded-[2.5rem] shadow-4xl z-50 flex items-center gap-12 translate-y-32 transition-transform duration-500">
+        <span id="selectedCount" class="text-[10px] font-black text-white uppercase tracking-[0.2em] whitespace-nowrap">0 Selection(s)</span>
+        <div class="flex gap-4">
+            <button id="massDeleteBtn" class="px-8 py-3 bg-rose-600 hover:bg-rose-500 text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition shadow-3xl shadow-rose-500/20 active:scale-95">
+                Bulk Decommission
+            </button>
+        </div>
+    </div>
+</main>
+
+<!-- Modals System -->
+<div id="modalOverlay" class="fixed inset-0 bg-[#0a0a0c]/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-6">
+    <div id="renameModal" class="hidden liquid-glass border border-white/5 p-12 rounded-[3rem] w-full max-w-md shadow-4xl space-y-8">
+        <div class="space-y-2">
+            <h3 class="text-2xl font-black text-white tracking-tight">Rename Asset</h3>
+            <p class="text-zinc-500 text-xs font-medium">Coordinate a new alias for this resource.</p>
+        </div>
+        <input type="text" id="newFileName" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm outline-none focus:ring-1 focus:ring-blue-500/30">
+        <div class="flex gap-4">
+            <button onclick="closeModals()" class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest rounded-2xl transition">Cancel</button>
+            <button onclick="confirmRename()" class="flex-1 py-4 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition shadow-3xl shadow-blue-500/20">Commit</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const instanceId = '<%= req.params.id %>';
+    const currentPath = '<%= req.query.path || "" %>';
+
+    function toggleDropdown(e, id) {
+        e.stopPropagation();
+        const drop = document.getElementById(`dropdown-${id}`);
+        document.querySelectorAll('[id^="dropdown-"]').forEach(d => { if(d !== drop) d.classList.add('hidden') });
+        drop.classList.toggle('hidden');
+    }
+
+    document.onclick = () => document.querySelectorAll('[id^="dropdown-"]').forEach(d => d.classList.add('hidden'));
+
+    let activeFileName = '';
+    const modalOverlay = document.getElementById('modalOverlay');
+    const renameModal = document.getElementById('renameModal');
+
+    function openRenameModal(name) {
+        activeFileName = name;
+        document.getElementById('newFileName').value = name;
+        modalOverlay.classList.remove('hidden');
+        renameModal.classList.remove('hidden');
+    }
+
+    function closeModals() {
+        modalOverlay.classList.add('hidden');
+        renameModal.classList.add('hidden');
+    }
+
+    function confirmRename() {
+        const newName = document.getElementById('newFileName').value.trim();
+        if(newName && newName !== activeFileName) {
+            window.location.href = `/instance/${instanceId}/files/rename/${activeFileName}/${encodeURIComponent(newName)}${currentPath ? '?path=' + currentPath : ''}`;
+        }
+    }
+
+    function openDeleteModal(name) {
+        if(confirm(`Are you sure you want to decommission ${name}?`)) {
+            window.location.href = `/instance/${instanceId}/files/delete/${name}${currentPath ? '?path=' + currentPath : ''}`;
+        }
+    }
+
+    // Selection Logic
+    const selectAll = document.getElementById('selectAll');
+    const checks = document.querySelectorAll('.file-checkbox');
+    const bar = document.getElementById('floatingActionBar');
+    const count = document.getElementById('selectedCount');
+
+    function updateSel() {
+        const sel = [...checks].filter(c => c.checked).map(c => c.dataset.filename);
+        count.textContent = `${sel.length} SELECTION${sel.length !== 1 ? 'S' : ''}`;
+        bar.classList.toggle('translate-y-32', sel.length === 0);
+        bar.classList.toggle('translate-y-0', sel.length > 0);
+    }
+
+    selectAll.onchange = () => { checks.forEach(c => c.checked = selectAll.checked); updateSel(); };
+    checks.forEach(c => c.onchange = updateSel);
+
+    document.getElementById('massDeleteBtn').onclick = async () => {
+        const sel = [...checks].filter(c => c.checked).map(c => c.dataset.filename);
+        if(confirm(`Bulk decommission ${sel.length} resources?`)) {
+            for(const f of sel) {
+                await fetch(`/instance/${instanceId}/files/delete/${f}${currentPath ? '?path=' + currentPath : ''}`);
+            }
+            window.location.reload();
+        }
+    };
+
+    // Upload Logic
+    const upBtn = document.getElementById('uploadBtn');
+    const upInp = document.getElementById('fileInput');
+
+    upBtn.onclick = () => upInp.click();
+    upInp.onchange = () => {
+        if(!upInp.files.length) return;
+        const fd = new FormData();
+        [...upInp.files].forEach(f => fd.append('files', f));
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `/instance/${instanceId}/files/upload${currentPath ? '?path=' + currentPath : ''}`);
+        xhr.onload = () => window.location.reload();
+        xhr.send(fd);
+    };
+
+    // Download file via the NODE API
+    function downloadFile(filename) {
+        const path = currentPath ? currentPath + '/' + filename : filename;
+        window.open(`/instance/${instanceId}/files/view/${filename}${currentPath ? '?path=' + currentPath : ''}`, '_blank');
+    }
+
+    // Create archive of the volume
+    async function createArchive() {
+        if(!confirm('Create a backup archive of this volume?')) return;
+        try {
+            const resp = await fetch(`/instance/${instanceId}/archives/create`, { method: 'POST' });
+            const data = await resp.json();
+            if (resp.ok) {
+                alert('Archive created successfully: ' + (data.archiveName || 'backup.zip'));
+            } else {
+                alert('Failed to create archive: ' + (data.message || 'Unknown error'));
+            }
+        } catch(err) {
+            alert('Failed to create archive: ' + err.message);
+        }
+    }
+
+    // Disk Stats
+    const p = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${p}://${window.location.hostname}${window.location.port ? ':'+window.location.port : ''}/stats/${instanceId}`);
+    ws.onmessage = e => {
+        try {
+            const s = JSON.parse(e.data);
+            if(s.volumeSize) {
+                const used = s.volumeSize;
+                const limit = <%= instance.Disk || 0 %>;
+                const pct = limit > 0 ? (used/limit*100).toFixed(1) : '∞';
+                document.getElementById('diskUsage').textContent = `${pct}% ALLOCATED (${used} MB / ${limit || '∞'} MB)`;
+            }
+        } catch(err) {}
+    }
+</script>
+<%- include('../components/footer') %>

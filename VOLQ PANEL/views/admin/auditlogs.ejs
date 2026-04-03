@@ -1,0 +1,138 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Security Ledger</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.auditLogs %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.auditLogsText %></p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="liquid-glass p-8 rounded-[2rem] border border-white/5 flex flex-wrap items-center gap-8">
+            <div class="space-y-3">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Event Classification</label>
+                <select id="actionFilter" class="block w-64 px-5 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-white text-xs appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                    <option value="" class="bg-zinc-900" <%= !filters.actionFilter ? 'selected' : '' %>>All Actions</option>
+                    <% actions.forEach(action => { %>
+                        <option value="<%= action %>" class="bg-zinc-900" <%= filters.actionFilter === action ? 'selected' : '' %>><%= action %></option>
+                    <% }); %>
+                </select>
+            </div>
+
+            <div class="space-y-3">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Temporal Range</label>
+                <select id="dateRange" class="block w-64 px-5 py-3 bg-white/[0.03] border border-white/5 rounded-xl text-white text-xs appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                    <option value="2" class="bg-zinc-900" <%= filters.dateRange == 2 ? 'selected' : '' %>>Last 48 Hours</option>
+                    <option value="7" class="bg-zinc-900" <%= filters.dateRange == 7 ? 'selected' : '' %>>Standard Week</option>
+                    <option value="30" class="bg-zinc-900" <%= filters.dateRange == 30 ? 'selected' : '' %>>Monthly Cycle</option>
+                    <option value="" class="bg-zinc-900" <%= filters.dateRange == null || filters.dateRange === '' ? 'selected' : '' %>>Full History</option>
+                </select>
+            </div>
+
+            <div class="flex items-end gap-3 h-full pt-6">
+                <button id="sortAsc" class="px-5 py-3 bg-white/[0.03] border border-white/5 hover:bg-white/10 text-white text-[10px] font-bold rounded-xl transition uppercase tracking-widest">Chronological</button>
+                <button id="sortDesc" class="px-5 py-3 bg-white/[0.03] border border-white/5 hover:bg-white/10 text-white text-[10px] font-bold rounded-xl transition uppercase tracking-widest">Recent First</button>
+            </div>
+        </div>
+
+        <!-- Ledger Table -->
+        <div class="liquid-glass rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
+            <% if (audits && audits.length > 0) { %>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-white/[0.02] border-b border-white/5">
+                                <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Actor</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Operation</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Network Origin</th>
+                                <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditBody" class="divide-y divide-white/[0.02]">
+                            <% audits.forEach(function(audit) { %>
+                                <tr class="hover:bg-white/[0.01] transition-colors group" data-timestamp="<%= new Date(audit.timestamp).getTime() %>">
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-[10px] font-bold text-zinc-500 group-hover:text-blue-500 transition-colors">
+                                                <%= (audit.username || 'SYS')[0].toUpperCase() %>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-white uppercase tracking-tight">
+                                                    <% if (audit.userId === req.user.userId) { %>
+                                                        <%= req.translations.you %>
+                                                    <% } else { %>
+                                                        <%= audit.username %>
+                                                    <% } %>
+                                                </p>
+                                                <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest"><%= audit.userId %></p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <span class="px-2 py-1 bg-blue-500/5 border border-blue-500/10 rounded-md text-[10px] font-bold text-blue-400 uppercase tracking-tighter"><%= audit.action %></span>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <span class="text-[11px] font-mono text-zinc-500"><%= audit.ip %></span>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-widest"><%= new Date(audit.timestamp).toLocaleString() %></span>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <div class="py-24 text-center">
+                    <p class="text-sm text-zinc-600 font-bold uppercase tracking-widest"><%= req.translations.auditLogsNotAvailable %></p>
+                </div>
+            <% } %>
+            
+            <% if (typeof pagination !== 'undefined' && pagination) { %>
+            <div class="p-8 bg-white/[0.01] border-t border-white/5">
+                <%- include('../components/pagination', { pagination, filters: { action: typeof filters !== 'undefined' ? filters.actionFilter : '', dateRange: typeof filters !== 'undefined' ? filters.dateRange : '' } }) %>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const actionFilter = document.getElementById('actionFilter');
+        const dateRange = document.getElementById('dateRange');
+        const sortAsc = document.getElementById('sortAsc');
+        const sortDesc = document.getElementById('sortDesc');
+        const tableBody = document.getElementById('auditBody');
+
+        function navigateWithFilters(page = 1) {
+            const params = new URLSearchParams();
+            params.set('page', page);
+            if (actionFilter.value) params.set('action', actionFilter.value);
+            if (dateRange.value) params.set('dateRange', dateRange.value);
+            window.location.href = '/admin/auditlogs?' + params.toString();
+        }
+
+        function sortTable(ascending) {
+            if (!tableBody) return;
+            const rows = Array.from(tableBody.querySelectorAll('tr'));
+            rows.sort((a, b) => {
+                const clockA = parseInt(a.dataset.timestamp);
+                const clockB = parseInt(b.dataset.timestamp);
+                return ascending ? clockA - clockB : clockB - clockA;
+            });
+            tableBody.innerHTML = '';
+            rows.forEach(r => tableBody.appendChild(r));
+        }
+
+        actionFilter.onchange = () => navigateWithFilters(1);
+        dateRange.onchange = () => navigateWithFilters(1);
+        sortAsc.onclick = () => sortTable(true);
+        sortDesc.onclick = () => sortTable(false);
+        window.navigateWithFilters = navigateWithFilters;
+    });
+</script>
+<%- include('../components/footer') %>

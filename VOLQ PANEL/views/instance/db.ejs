@@ -1,0 +1,106 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Data Infrastructure</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Relational Repositories</h2>
+            <p class="text-zinc-500 text-sm font-medium">Coordinate and scale secure data storage for your application ecosystem.</p>
+        </div>
+
+        <button id="openCreateModal" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-emerald-500/20 active:scale-95 flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            Provision Database
+        </button>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Repository Registry -->
+    <div class="liquid-glass rounded-[3rem] border border-white/5 shadow-3xl overflow-hidden relative">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/[0.02] border-b border-white/5">
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Network Host</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Identifier</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Schema Alias</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Access Cipher</th>
+                        <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">Operations</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/[0.02]">
+                    <% if (databases.length === 0) { %>
+                        <tr>
+                            <td colspan="5" class="px-8 py-12 text-center text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em]">No active data repositories detected.</td>
+                        </tr>
+                    <% } %>
+                    <% databases.forEach(function(db) { %>
+                        <tr class="hover:bg-white/[0.01] transition-colors group cursor-pointer">
+                            <td class="px-8 py-6">
+                                <span class="px-4 py-2 bg-black/40 border border-white/5 rounded-xl text-[11px] font-mono text-blue-400"><%= db.host %></span>
+                            </td>
+                            <td class="px-8 py-6 text-xs font-bold text-white uppercase tracking-tight"><%= db.userName %></td>
+                            <td class="px-8 py-6 text-xs font-bold text-zinc-400 uppercase tracking-tight"><%= db.dbName %></td>
+                            <td class="px-8 py-6">
+                                <div class="px-4 py-2 bg-white/5 border border-white/5 rounded-xl group/pass cursor-pointer relative overflow-hidden">
+                                     <span class="text-[11px] font-mono text-zinc-500 blur-[4px] group-hover/pass:blur-0 transition-all duration-300" onclick="navigator.clipboard.writeText('<%= db.password %>')"><%= db.password %></span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <a href="/instance/<%= req.params.id %>/db/delete/<%= db.dbName %>" class="px-6 py-2 bg-rose-600/10 hover:bg-rose-500 text-rose-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition transition-all active:scale-95">Decommission</a>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Provisioning Modal -->
+<div id="modalOverlay" class="fixed inset-0 bg-[#0a0a0c]/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-6">
+    <div class="liquid-glass border border-white/5 p-12 rounded-[3.5rem] w-full max-w-md shadow-4xl space-y-10">
+        <div class="space-y-4 text-center">
+            <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center font-black text-white text-xl mx-auto mb-6 shadow-2xl shadow-emerald-500/20">D</div>
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-bold rounded-lg w-max mx-auto tracking-tighter uppercase">Nexus provisioning</div>
+                <h3 class="text-3xl font-black text-white tracking-tight">Provision Database</h3>
+                <p class="text-zinc-500 text-xs font-medium">The schema alias will be prefixed for isolation.</p>
+            </div>
+        </div>
+
+        <form id="createForm" action="/instance/<%= req.params.id %>/db/create" method="POST" class="space-y-8">
+            <div class="space-y-2">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest ml-1">Repository Name</label>
+                <input type="text" id="dbNameInput" name="databaseName" placeholder="production_v1" required class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm outline-none focus:ring-1 focus:ring-emerald-500/30 transition-all placeholder:text-zinc-800">
+            </div>
+
+            <div class="flex gap-4 pt-4">
+                <button type="button" id="closeModal" class="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white text-[10px] font-bold uppercase tracking-widest rounded-2xl transition">Decline</button>
+                <button type="submit" class="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl transition shadow-3xl shadow-emerald-500/20">Initialize</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const over = document.getElementById('modalOverlay');
+    document.getElementById('openCreateModal').onclick = () => over.classList.remove('hidden');
+    document.getElementById('closeModal').onclick = () => over.classList.add('hidden');
+    over.onclick = (e) => { if(e.target === over) over.classList.add('hidden') };
+
+    document.getElementById('createForm').onsubmit = (e) => {
+        e.preventDefault();
+        const n = document.getElementById('dbNameInput').value.trim();
+        const f = document.createElement('form');
+        f.method = 'POST';
+        f.action = e.target.action + '/' + encodeURIComponent(n);
+        const i = document.createElement('input');
+        i.type = 'hidden'; i.name = 'databaseName'; i.value = n;
+        f.appendChild(i);
+        document.body.appendChild(f);
+        f.submit();
+    };
+</script>
+<%- include('../components/footer') %>

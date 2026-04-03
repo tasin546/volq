@@ -1,0 +1,71 @@
+<div class="px-4 sm:px-8 lg:px-16 mb-8 lg:mb-12">
+    <nav class="relative">
+        <!-- Persistent Matrix Navigation -->
+        <div class="flex items-center gap-0.5 liquid-glass p-1.5 rounded-2xl border border-white/5 shadow-2xl relative group/nav overflow-x-auto no-scrollbar w-full">
+            <div id="nexus-indicator" class="absolute h-[calc(100%-12px)] bg-white/5 rounded-xl border border-white/5 transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] pointer-events-none"></div>
+            
+            <% 
+                const navItems = [
+                    { label: 'Console', icon: 'M13 10V3L4 14h7v7l9-11h-7z', url: '' },
+                    { label: 'Files', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z', url: '/files' },
+                    { label: 'Databases', icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4', url: '/db' },
+                    { label: 'Networking', icon: 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071a9.5 9.5 0 0113.436 0m-17.678-4.243a15.5 15.5 0 0121.92 0', url: '/network' },
+                    { label: 'Startup', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z', url: '/startup' },
+                    { label: 'Users', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', url: '/users' },
+                    { label: 'Plugins', icon: 'M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z', url: '/plugins' }
+                ];
+
+                addons.plugins.forEach(plugin => {
+                    if (plugin.instancesidebar) {
+                        Object.entries(plugin.instancesidebar).forEach(([key, value]) => {
+                            navItems.push({ label: key, icon: 'M13 10V3L4 14h7v7l9-11h-7z', url: (value.url).replace('/instance/' + req.params.id, '') });
+                        });
+                    }
+                });
+            %>
+
+            <% navItems.forEach(item => { %>
+                <a href="/instance/<%= req.params.id %><%= item.url %>" class="nexus-link flex-1 px-3 py-2.5 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 hover:text-white transition-all relative z-10 whitespace-nowrap rounded-xl">
+                    <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= item.icon %>"/></svg>
+                    <span><%= item.label %></span>
+                </a>
+            <% }); %>
+        </div>
+    </nav>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const links = document.querySelectorAll('.nexus-link');
+        const indicator = document.getElementById('nexus-indicator');
+        const path = window.location.pathname;
+
+        function updateIndicator() {
+            let active = null;
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (path === href || (path.startsWith(href) && href.split('/').length > 3)) {
+                    active = link;
+                }
+            });
+
+            if (active) {
+                links.forEach(l => l.classList.replace('text-white', 'text-zinc-500'));
+                active.classList.replace('text-zinc-500', 'text-white');
+                
+                const rect = active.getBoundingClientRect();
+                const parentRect = active.parentElement.getBoundingClientRect();
+                indicator.style.width = rect.width + 'px';
+                indicator.style.left = (rect.left - parentRect.left) + 'px';
+            }
+        }
+
+        updateIndicator();
+        window.addEventListener('resize', updateIndicator);
+    });
+</script>
+
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>

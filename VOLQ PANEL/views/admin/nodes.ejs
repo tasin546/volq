@@ -1,0 +1,282 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Compute Fabric</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.nodes %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.nodesText %></p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="radarcheck()" class="px-6 py-3 bg-white/[0.03] border border-white/10 hover:bg-white/10 text-white text-[10px] font-bold rounded-2xl transition active:scale-95 uppercase tracking-widest flex items-center gap-3">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 256 256"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path></svg>
+                    Radar Scan
+                </button>
+                <button id="createButton" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest">
+                    <%= req.translations.createNewNode %>
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div id="stats" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="liquid-glass p-10 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-500/5 rounded-full blur-[80px]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Active Deployments</span>
+                <div class="flex items-baseline gap-3">
+                    <span class="text-5xl font-black text-white group-hover:text-emerald-500 transition-colors"><%= nodes.length %></span>
+                    <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Nodes Integrated</span>
+                </div>
+                <div class="mt-6 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest"><%= nodes.filter(node => node.status === 'Online').length %> Systems Online</span>
+                </div>
+            </div>
+
+            <div class="liquid-glass p-10 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Total Virtualization</span>
+                <div class="flex items-baseline gap-3">
+                    <span class="text-5xl font-black text-white group-hover:text-blue-500 transition-colors"><%= Object.values(set).reduce((a, b) => a + b, 0) %></span>
+                    <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Total Instances</span>
+                </div>
+                <% if (nodes.length > 0) { %>
+                    <p class="mt-6 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Efficiency: <span class="text-blue-400"><%= (Object.values(set).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %> units/node</span></p>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Nodes Table -->
+        <div id="nodeTable" class="liquid-glass rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Identity</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Connection</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Density</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none text-right">Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.02]">
+                        <% nodes.forEach(function(node) { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="relative">
+                                        <% if (node.status == "Online") { %>
+                                            <div class="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse"></div>
+                                        <% } else { %>
+                                            <div class="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"></div>
+                                        <% } %>
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <p class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors"><%= node.name %></p>
+                                        <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest"><%= node.id.substring(0, 8) %></p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-3">
+                                    <span class="px-3 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-[11px] font-mono text-zinc-400 tracking-tight"><%= node.address %>:<%= node.port %></span>
+                                    <span class="px-2 py-0.5 <%= node.versionRelease ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500' %> rounded-md text-[9px] font-bold uppercase tracking-tighter border border-white/5">
+                                        <%= node.versionRelease || 'Unknown' %>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="text-xs font-bold text-white"><%= set[node.id] || 0 %></span>
+                                <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest ml-1">Units</span>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <div class="flex justify-end gap-3 translate-x-2 group-hover:translate-x-0 transition-transform">
+                                    <button onclick="configure('<%= node.id %>')" class="p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-emerald-600 hover:text-white hover:border-emerald-500 transition-all text-zinc-500 focus:outline-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    </button>
+                                    <a href="./node/<%= node.id %>" class="p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-zinc-500 focus:outline-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </a>
+                                    <button onclick="deletenode('<%= node.id %>')" class="p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all text-zinc-500 focus:outline-none">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% if (typeof pagination !== 'undefined' && pagination) { %>
+            <div class="p-6 bg-white/[0.02] border-t border-white/5">
+                <%- include('../components/pagination', { pagination }) %>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Node Form -->
+        <div id="nodeForm" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="liquid-glass rounded-[3rem] p-12 border border-blue-500/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                
+                <h3 class="text-2xl font-bold text-white mb-8">Provision New Node</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Node Alias</label>
+                            <input id="nodeName" type="text" placeholder="London-Edge-01" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">RAM (GB)</label>
+                                <input id="nodeRam" type="number" placeholder="64" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Disk (GB)</label>
+                                <input id="nodeDisk" type="number" placeholder="1024" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Connectivity Address</label>
+                            <input id="nodeAddress" type="text" placeholder="node.provider.com" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Communication Port</label>
+                            <input id="nodePort" type="number" placeholder="3002" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Processor / CPU</label>
+                            <input id="nodeProcessor" type="text" placeholder="Intel Xeon E5-2680 v4" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                        </div>
+                    </div>
+                    <div class="col-span-full">
+                         <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Classification Tags</label>
+                         <div id="tagContainer" class="flex flex-wrap gap-2 mb-4"></div>
+                         <input id="tagInput" type="text" placeholder="Press Enter to add tags (e.g. NVMe, EPYC)" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                    </div>
+                </div>
+
+                <div class="mt-12 flex gap-4 pt-8 border-t border-white/[0.03]">
+                    <button id="createNodeBtn" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95">
+                        Initialize Node Integration
+                    </button>
+                    <button onclick="window.location.reload()" class="px-10 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white text-xs font-bold rounded-2xl transition">
+                        Discard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    async function radarcheck() {
+        await fetch('/admin/nodes/radar/check', { method: 'POST' });
+        alert('Radar scan initiated across all compute units.');
+    }
+
+    async function configure(nodeId) {
+        const response = await fetch(`/admin/node/${nodeId}/configure-command`);
+        const data = await response.json();
+        showPopup(data.configureCommand);
+    }
+
+    // Modal and other logic updated to match liquid glass theme
+    function showPopup(command) {
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/60 backdrop-blur-3xl z-[100] flex justify-center items-center p-6';
+        overlay.innerHTML = `
+            <div class="liquid-glass rounded-[3.5rem] p-12 max-w-2xl w-full border border-white/10 shadow-3xl animate-in zoom-in-95 duration-300 relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-[100px]"></div>
+                <div class="w-20 h-20 bg-emerald-500/10 rounded-[2rem] flex items-center justify-center text-emerald-500 mb-8 mx-auto border border-emerald-500/20">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <h3 class="text-3xl font-black text-center text-white mb-2 leading-tight">Token Synchronized</h3>
+                <p class="text-zinc-500 text-center text-sm font-medium mb-10 leading-relaxed">Run this deployment string on your node terminal to finalize the connection bridge.</p>
+                <div class="p-6 bg-black/40 border border-white/5 rounded-3xl mb-10 group relative">
+                    <code class="text-xs font-mono text-emerald-400 break-all leading-loose">${command}</code>
+                    <button id="copyBtn" class="absolute top-4 right-4 p-2 bg-white/5 rounded-xl hover:bg-white/10 transition">
+                         <svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    </button>
+                </div>
+                <button id="closeModal" class="w-full py-5 bg-white text-black font-black text-xs uppercase tracking-[0.2em] rounded-3xl shadow-3xl hover:bg-zinc-200 transition active:scale-95">Complete Setup</button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+        document.getElementById('closeModal').onclick = () => overlay.remove();
+        document.getElementById('copyBtn').onclick = () => {
+            const btn = document.getElementById('copyBtn');
+            const checkIcon = '<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+            const copyIcon = '<svg class="w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+            const doCopy = () => {
+                btn.innerHTML = checkIcon;
+                setTimeout(() => { btn.innerHTML = copyIcon; }, 2000);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(command).then(doCopy).catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = command;
+                    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    doCopy();
+                });
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = command;
+                ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                doCopy();
+            }
+        };
+    }
+
+    document.getElementById('createButton').onclick = () => {
+        document.getElementById('stats').classList.add('hidden');
+        document.getElementById('nodeTable').classList.add('hidden');
+        document.getElementById('nodeForm').classList.remove('hidden');
+        document.getElementById('createButton').classList.add('hidden');
+    };
+
+    // Tag and creation logic
+    const tagInput = document.getElementById('tagInput');
+    const tagContainer = document.getElementById('tagContainer');
+    tagInput.onkeypress = (e) => {
+        if(e.key === 'Enter' && tagInput.value.trim()) {
+            const span = document.createElement('span');
+            span.className = 'px-3 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-xs font-bold text-zinc-400 flex items-center gap-2';
+            span.innerHTML = `${tagInput.value} <button class="hover:text-white" onclick="this.parentElement.remove()">×</button>`;
+            tagContainer.appendChild(span);
+            tagInput.value = '';
+        }
+    };
+
+    document.getElementById('createNodeBtn').onclick = () => {
+        const data = {
+            name: document.getElementById('nodeName').value,
+            ram: document.getElementById('nodeRam').value,
+            disk: document.getElementById('nodeDisk').value,
+            processor: document.getElementById('nodeProcessor').value,
+            address: document.getElementById('nodeAddress').value,
+            port: document.getElementById('nodePort').value,
+            tags: Array.from(tagContainer.children).map(c => c.textContent.replace('×', '').trim()).join(' - ')
+        };
+        fetch('/nodes/create', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) })
+        .then(res => res.ok ? window.location.reload() : showStatusModal('Operational Failure', 'Form validation failure or communication bridge rejected. Ensure all fields are populated.', 'error'));
+    };
+
+    window.deletenode = (nodeId) => {
+        if(!confirm('Execute decommissioning sequence? This will terminate all active links.')) return;
+        fetch('/nodes/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nodeId }) })
+        .then(res => res.ok ? window.location.reload() : alert('Failed to decommission node. Check dependencies.'));
+    };
+</script>
+<%- include('../components/footer') %>

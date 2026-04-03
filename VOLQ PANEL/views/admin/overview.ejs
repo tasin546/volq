@@ -1,0 +1,102 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Global Insights</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.overview %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.overviewText %></p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="liquid-glass glass-shine p-8 rounded-[2.5rem] flex flex-col group border border-white/5">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4"><%= req.translations.users %></span>
+                <div class="flex items-baseline gap-2">
+                     <span class="text-4xl font-bold group-hover:text-blue-400 transition-colors uppercase"><%= usersTotal %></span>
+                     <span class="text-[10px] text-emerald-500 font-bold uppercase tracking-tight">Active</span>
+                </div>
+            </div>
+            <div class="liquid-glass glass-shine p-8 rounded-[2.5rem] flex flex-col group border-l-2 border-l-blue-500">
+                <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-4"><%= req.translations.instances %></span>
+                <div class="flex items-baseline gap-2">
+                     <span class="text-4xl font-bold group-hover:text-blue-400 transition-colors uppercase"><%= instancesTotal %></span>
+                     <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-tight">Servers</span>
+                </div>
+            </div>
+            <div class="liquid-glass glass-shine p-8 rounded-[2.5rem] flex flex-col group">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4"><%= req.translations.nodes %></span>
+                <div class="flex items-baseline gap-2">
+                     <span class="text-4xl font-bold group-hover:text-blue-400 transition-colors uppercase"><%= nodesTotal %></span>
+                     <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-tight">Connected</span>
+                </div>
+            </div>
+            <div class="liquid-glass glass-shine p-8 rounded-[2.5rem] flex flex-col group">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4"><%= req.translations.images %></span>
+                <div class="flex items-baseline gap-2">
+                     <span class="text-4xl font-bold group-hover:text-blue-400 transition-colors uppercase"><%= imagesTotal %></span>
+                     <span class="text-[10px] text-zinc-600 font-bold uppercase tracking-tight">Verified</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Version & Info -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch pt-4">
+            <div class="xl:col-span-8">
+                <div class="liquid-glass rounded-[3rem] p-12 relative overflow-hidden h-full flex flex-col lg:flex-row items-center gap-14 group border border-white/10 shadow-2xl">
+                    <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                    
+                    <img src="/assets/logo.png" alt="Logo" class="w-48 h-48 rounded-[2.8rem] flex flex-shrink-0 items-center justify-center shadow-inner border border-white/5 rotate-2 group-hover:rotate-0 transition-all object-cover">
+
+
+                    <div class="flex-1 space-y-8">
+                        <div>
+                            <h3 class="text-3xl font-bold text-white mb-4 leading-tight">Mastering Your Infrastructure</h3>
+                            <p class="text-zinc-500 text-lg leading-relaxed max-w-lg">
+                                <%= req.translations.sysInfoText %> <span id="currentVersion" class="text-blue-500 font-bold tracking-widest"><%= version %></span>. <br>
+                                <span id="versionStatus" class="text-sm font-bold mt-2 block text-emerald-500 uppercase tracking-widest">Up to Date</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Connectivity -->
+            <div class="xl:col-span-4 flex flex-col gap-4">
+                 <div class="liquid-glass rounded-[2.5rem] p-10 flex flex-col border border-white/5 h-full">
+                     <p class="text-[10px] font-bold text-zinc-700 uppercase tracking-[0.3em] text-center mb-10">Connectivity</p>
+                     <div class="space-y-4">
+                        <a href="https://discord.gg/cdKMGPdpJB" target="_blank" class="flex items-center justify-between p-5 rounded-[1.3rem] bg-white/[0.01] hover:bg-amber-500/10 border border-white/5 hover:border-amber-500/20 transition-all group">
+                            <span class="text-xs font-bold text-zinc-500 group-hover:text-amber-500 transition-colors ml-2">Official Discord</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                        </a>
+                        <a href="https://volq.xyz/" target="_blank" class="flex items-center justify-between p-5 rounded-[1.3rem] bg-white/[0.01] hover:bg-blue-500/10 border border-white/5 hover:border-blue-500/20 transition-all group">
+                            <span class="text-xs font-bold text-zinc-500 group-hover:text-blue-500 transition-colors ml-2">Documentation</span>
+                            <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div>
+                        </a>
+                        <a href="https://github.com/Tasin546" target="_blank" class="flex items-center justify-between p-5 rounded-[1.3rem] bg-white/[0.01] hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all group">
+                            <span class="text-xs font-bold text-zinc-500 group-hover:text-white transition-colors ml-2">GitHub Repository</span>
+                            <svg class="w-4 h-4 opacity-30 group-hover:opacity-100 transition-all" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                     </div>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div class="flex justify-center pt-8 border-t border-white/[0.03]">
+            <a href="https://github.com/Tasin546" target="_blank" class="flex items-center gap-3 px-10 py-4 bg-white/[0.02] hover:bg-emerald-500 hover:text-black font-bold text-[11px] rounded-[1.3rem] border border-white/5 hover:border-emerald-400 transition-all shadow-3xl group">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/10 group-hover:bg-black/20 flex items-center justify-center transition-colors">
+                    <svg class="w-3.5 h-3.5 text-emerald-500 group-hover:text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.45 12.13c-.34.18-.85.41-1.45.41-1.21 0-1.92-.71-1.92-1.91V8.5h-1V7.5h1V5.7l1.01-.2v2h1.44v1h-1.44v3.91c0 .59.3.83.9.83.33 0 .54-.05.74-.15l.28.94z"/></svg>
+                </div>
+                Official Support Center
+            </a>
+        </div>
+    </div>
+</main>
+
+
+
+<%- include('../components/footer') %>

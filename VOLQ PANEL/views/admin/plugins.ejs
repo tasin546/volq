@@ -1,0 +1,73 @@
+<%- include('../components/admin_addons_template') %>
+<div class="space-y-12">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Modules Ecosystem</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Plugins Overview</h2>
+            <p class="text-zinc-500 text-sm font-medium">A list of all the Plugins installed on the panel.</p>
+        </div>
+        <button id="reload" type="button" class="group flex items-center gap-3 px-6 py-3 bg-white/[0.03] border border-white/5 hover:border-emerald-500/30 text-white text-[10px] font-bold rounded-2xl transition hover:bg-emerald-500/5 active:scale-95 uppercase tracking-widest" onclick="fetch('/admin/plugins/reload', {method: 'POST'}), location.reload()">
+            <svg class="w-4 h-4 text-emerald-500 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h0.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Sync Environment
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 flex items-center justify-between group overflow-hidden relative">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-blue-600/5 rounded-full blur-[60px]"></div>
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-2">Total Modules</span>
+                <span class="text-3xl font-black text-white"><%= plugins.length %></span>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-blue-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+            </div>
+        </div>
+
+        <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 flex items-center justify-between group overflow-hidden relative">
+            <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-600/5 rounded-full blur-[60px]"></div>
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-2">Active Assets</span>
+                <span class="text-3xl font-black text-white"><%= enabledPlugins.length %></span>
+            </div>
+            <div class="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-emerald-500 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plugin List -->
+    <div class="space-y-6">
+        <h3 class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-2">Installed Infrastructure</h3>
+        <div class="grid grid-cols-1 gap-4">
+            <% plugins.forEach(function(plugin) { %>
+                <div class="liquid-glass group p-6 rounded-[2rem] border border-white/5 flex items-center justify-between hover:bg-white/[0.03] transition-all">
+                    <div class="flex items-center gap-6">
+                        <div class="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-blue-500 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-bold text-white uppercase tracking-tight"><%= plugin.name %></p>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest underline decoration-zinc-800 cursor-pointer hover:text-blue-500 transition-colors" onclick="location.href='/admin/plugins/<%= plugin.directoryname %>/edit'">Advanced Config</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="fetch('/admin/plugins/<%= plugin.name %>/toggle', {method: 'POST'}).then((res) => { if (res.ok) location.reload() })" class="px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                        <% if (enabledPlugins.some(pluginObj => pluginObj.name === plugin.name)) { %>
+                            <span class="bg-rose-500/10 border border-rose-500/20 text-rose-500 px-6 py-2.5 rounded-xl hover:bg-rose-500 hover:text-white block transition-all">Deactivate</span>
+                        <% } else { %>
+                            <span class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 px-6 py-2.5 rounded-xl hover:bg-emerald-500 hover:text-white block transition-all">Initialize</span>
+                        <% } %>
+                    </button>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+</div>
+<!-- Close template shell div -->
+</div>
+<%- include('../components/footer') %>

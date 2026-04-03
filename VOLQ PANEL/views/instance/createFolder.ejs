@@ -1,0 +1,66 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <% let query = req.query.path ? '?path=' + req.query.path : ''; %>
+    
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-4 w-full">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Dimension Allocation</div>
+            <div class="flex items-center gap-4 w-full">
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none whitespace-nowrap">Provision Directory</h2>
+                <div class="flex-1 max-w-xl">
+                    <input id="folder" type="text" placeholder="assets_v1" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-[11px] font-black uppercase tracking-widest focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-800">
+                </div>
+            </div>
+            <div class="flex items-center gap-4 text-zinc-500 text-sm font-medium">
+                <span class="font-mono text-[11px] uppercase tracking-widest text-zinc-600">nexus://app/data/</span>
+                <span class="text-zinc-400 font-mono text-[11px]"><%= (req.query.path || '').replace(/^\/+/, '') %></span>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="/instance/<%= req.params.id %>/files<%= query %>" class="px-8 py-3.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition active:scale-95">
+                Discard
+            </a>
+            <button id="saveButton" onclick="saveFolder()" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-blue-500/20 active:scale-95">
+                Allocate Dimension
+            </button>
+        </div>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Context Module -->
+    <div class="liquid-glass p-12 rounded-[3.5rem] border border-white/5 shadow-4xl space-y-8 flex flex-col items-center justify-center text-center">
+        <div class="w-20 h-20 bg-blue-500/10 border border-blue-500/20 rounded-[2rem] flex items-center justify-center text-blue-500 shadow-2xl shadow-blue-500/10">
+            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>
+        </div>
+        <div class="space-y-2">
+            <h3 class="text-2xl font-black text-white tracking-tight uppercase">Dimension Protocol</h3>
+            <p class="text-zinc-500 text-xs font-medium max-w-sm mx-auto leading-relaxed">Initializing a new structural branch within the filesystem hierarchy. This dimension will inherit parent permissions.</p>
+        </div>
+    </div>
+</main>
+
+<script>
+    function saveFolder() {
+        const btn = document.getElementById('saveButton');
+        const name = document.getElementById('folder').value.trim();
+        if(!name) return alert('NAME REQUIRED');
+        
+        btn.disabled = true;
+        btn.textContent = 'ALLOCATING...';
+        
+        fetch(`/instance/<%= req.params.id %>/files/folder/create/${name}<%= query %>`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        }).then(r => r.json()).then(d => {
+            btn.textContent = 'ALLOCATED';
+            setTimeout(() => window.location.href = `/instance/<%= req.params.id %>/files?path=<%= req.query.path %>/${name}`, 1000);
+        }).catch(() => {
+            btn.disabled = false;
+            btn.textContent = 'FAILED';
+        });
+    }
+</script>
+<%- include('../components/footer') %>

@@ -1,0 +1,142 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Access Control</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.APIKeys %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.APIKeysText %></p>
+            </div>
+            <button id="createButton" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest">
+                <%= req.translations.createNewAPIKey %>
+            </button>
+        </div>
+
+        <% if (req.query.err == "CREATED") { %>
+            <div class="liquid-glass border-emerald-500/20 p-6 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-emerald-500 uppercase tracking-tight">Access Token Generated</h3>
+                    <p class="text-xs text-zinc-500 mt-1">A new high-privilege API key has been added to the secure vault.</p>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- API Keys Table -->
+        <div id="nodeTable" class="liquid-glass rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Identifier</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Security Key</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center">Creation Date</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.02]">
+                        <% if (apiKeys.length === 0) { %>
+                            <tr>
+                                <td colspan="4" class="px-8 py-20 text-center">
+                                    <p class="text-sm text-zinc-600 font-bold uppercase tracking-widest"><%= req.translations.noApiKeysCreated %></p>
+                                </td>
+                            </tr>
+                        <% } %>
+                        <% apiKeys.forEach(function(key) { %>
+                        <tr class="hover:bg-white/[0.01] transition-colors group">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-blue-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-white uppercase tracking-tight"><%= key.id %></span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="px-4 py-2 bg-black/40 border border-white/5 rounded-xl text-[11px] font-mono text-emerald-400 group-hover:border-emerald-500/30 transition-colors w-max">
+                                    <%= key.key %>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-center">
+                                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest"><%= new Date(key.createdAt).toLocaleDateString() %></span>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <button class="removeButton p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-rose-600/10 hover:text-rose-500 hover:border-rose-500/30 transition-all text-zinc-500 focus:outline-none" data-keyid="<%= key.id %>">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-8 bg-white/[0.02] border-t border-white/5">
+                <%- include('../components/pagination', { pagination }) %>
+            </div>
+        </div>
+
+        <!-- Creation Form -->
+        <div id="nodeForm" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-20 liquid-glass rounded-[3rem] border border-blue-500/10 shadow-3xl overflow-hidden relative">
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+            
+            <div class="w-20 h-20 bg-blue-500/10 rounded-[2.5rem] flex items-center justify-center text-blue-500 mb-8 mx-auto border border-blue-500/20 shadow-2xl">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </div>
+            
+            <h3 class="text-3xl font-black text-white mb-4 leading-tight">Master Key Generation</h3>
+            <p class="text-zinc-500 max-w-md mx-auto text-sm font-medium mb-12">Initialize a new administrative access token for external interface synchronization.</p>
+            
+            <div class="flex justify-center gap-6">
+                <button id="createNodeBtn" class="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[2rem] transition shadow-3xl shadow-blue-500/20 active:scale-95">
+                    Authorize Generation
+                </button>
+                <button onclick="window.location.reload()" class="px-10 py-5 bg-white/5 border border-white/10 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[2rem] transition">
+                    Abort Protocol
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById("createButton").onclick = () => {
+        document.getElementById("nodeTable").classList.add("hidden");
+        document.getElementById("createButton").classList.add("hidden");
+        document.getElementById("nodeForm").classList.remove("hidden");
+    };
+
+    document.getElementById("createNodeBtn").onclick = async function() {
+        const btn = this;
+        btn.textContent = "SYNCHRONIZING VAULT...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch("/apikeys/create", { method: "POST" });
+            if(res.ok) {
+                alert('Secure access key synchronized successfully.');
+                window.location.reload();
+            } else throw new Error();
+        } catch(e) {
+            alert('Vault synchronization failure.');
+            btn.textContent = "Authorize Generation";
+            btn.disabled = false;
+        }
+    };
+
+    document.querySelectorAll('.removeButton').forEach(btn => {
+        btn.onclick = async function() {
+            if(!confirm('Execute decommissioning protocol for this token?')) return;
+            const res = await fetch('/apikeys/delete', {
+                method: 'DELETE',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ keyId: this.dataset.keyid })
+            });
+            if(res.ok) window.location.href = '../admin/apikeys?err=CREATED';
+            else alert('Decommissioning failed.');
+        }
+    });
+</script>
+<%- include('../components/footer') %>

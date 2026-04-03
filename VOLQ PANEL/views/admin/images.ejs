@@ -1,0 +1,206 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Virtualization Library</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.images %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.imagesText %></p>
+            </div>
+            <button id="uploadimage" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest">
+                <%= req.translations.importImage %>
+            </button>
+        </div>
+
+        <!-- Images Table -->
+        <div id="nodeTable" class="liquid-glass rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Blueprint</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Architect</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Distribution</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-right">Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.02]">
+                        <% images.forEach(function(image) { %>
+                        <tr class="image-row hover:bg-white/[0.02] transition-colors group cursor-pointer" data-image='<%= JSON.stringify(image) %>'>
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-blue-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                    </div>
+                                    <span class="text-xs font-bold text-white uppercase tracking-tight"><%= image.Name %></span>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest"><%= image.AuthorName %></span>
+                            </td>
+                            <td class="px-8 py-6">
+                                <div class="px-3 py-1 bg-black/40 border border-white/5 rounded-lg text-[10px] font-mono text-zinc-400 group-hover:border-blue-500/30 transition-colors w-max">
+                                    <%= image.Image %>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <button onclick="deleteImage('<%= image.Id %>'); event.stopPropagation();" class="p-2.5 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-rose-600/10 hover:text-rose-500 hover:border-rose-500/30 transition-all text-zinc-500">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% if (typeof pagination !== 'undefined' && pagination) { %>
+            <div class="p-8 bg-white/[0.02] border-t border-white/5">
+                <%- include('../components/pagination', { pagination }) %>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Detail Modal View -->
+        <div id="imageDetail" class="hidden animate-in fade-in slide-in-from-bottom-6 duration-500">
+            <div class="liquid-glass rounded-[3rem] p-12 border border-blue-500/10 shadow-3xl overflow-hidden relative">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                
+                <button id="backButton" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-white transition group mb-10">
+                    <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    Return to Library
+                </button>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 id="imageName" class="text-4xl font-black text-white leading-tight mb-4"></h3>
+                            <p id="imageDescription" class="text-zinc-500 text-sm font-medium leading-relaxed"></p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/5">
+                                <span class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest block mb-2">Architectural Metadata</span>
+                                <p id="authorInfo" class="text-xs font-bold text-white uppercase tracking-tight"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="space-y-4">
+                            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block ml-2">Container Specification</span>
+                            <div id="dockerImage" class="p-6 rounded-2xl bg-black/40 border border-white/5 font-mono text-xs text-blue-400"></div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block ml-2">Environment Projection</span>
+                            <div id="envVars" class="p-6 rounded-2xl bg-white/[0.02] border border-white/5 font-mono text-[10px] text-zinc-500 break-words leading-relaxed"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16 pt-10 border-t border-white/[0.03] flex flex-wrap gap-4">
+                    <button id="replaceImageButton" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-blue-500/20 active:scale-95">
+                        Synchronize Blueprint
+                    </button>
+                    <button id="deleteImageButton" class="px-10 py-4 bg-rose-600/10 border border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition">
+                        Decommission
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        const uploadBtn = document.getElementById('uploadimage');
+        const imageRows = document.querySelectorAll('.image-row');
+        const nodeTable = document.getElementById('nodeTable');
+        const imageDetail = document.getElementById('imageDetail');
+        const backButton = document.getElementById('backButton');
+        const imageName = document.getElementById('imageName');
+        const imageDescription = document.getElementById('imageDescription');
+        const dockerImage = document.getElementById('dockerImage');
+        const envVars = document.getElementById('envVars');
+        const authorInfo = document.getElementById('authorInfo');
+        const deleteImageButton = document.getElementById('deleteImageButton');
+        const replaceImageButton = document.getElementById('replaceImageButton');
+        let currentImage = null;
+
+        uploadBtn.onclick = () => {
+            let input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                let file = e.target.files[0];
+                if (file && file.type === 'application/json') {
+                    let reader = new FileReader();
+                    reader.onload = (re) => {
+                        fetch('/admin/images/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: re.target.result
+                        }).then(res => { if(res.ok) window.location.reload(); });
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        };
+
+        imageRows.forEach(row => {
+            row.onclick = () => {
+                let image = JSON.parse(row.dataset.image);
+                currentImage = image;
+                imageName.textContent = image.Name;
+                imageDescription.textContent = image.Description;
+                dockerImage.textContent = image.Image;
+                envVars.textContent = image.Env.join(', ');
+                authorInfo.textContent = image.Author + ' (' + image.AuthorName + ')';
+                nodeTable.classList.add('hidden');
+                imageDetail.classList.remove('hidden');
+            };
+        });
+
+        backButton.onclick = () => {
+            nodeTable.classList.remove('hidden');
+            imageDetail.classList.add('hidden');
+        };
+
+        deleteImageButton.onclick = () => { if(currentImage) deleteImage(currentImage.Id); };
+
+        replaceImageButton.onclick = () => {
+            let input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                let file = e.target.files[0];
+                if (file && file.type === 'application/json') {
+                    let reader = new FileReader();
+                    reader.onload = (re) => {
+                        fetch('/admin/images/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: re.target.result
+                        }).then(res => { 
+                            if(res.ok) deleteImage(currentImage.Id);
+                        });
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        };
+
+        window.deleteImage = async function(id) {
+            if(!confirm('Execute decommissioning protocol for this blueprint?')) return;
+            fetch('/admin/images/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            }).then(res => { if(res.ok) window.location.reload(); });
+        }
+    });
+</script>
+<%- include('../components/footer') %>

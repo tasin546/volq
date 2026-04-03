@@ -1,0 +1,276 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Fleet Management</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.instances %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.instancesText %></p>
+            </div>
+            <button id="createButton" class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95 uppercase tracking-widest">
+                <%= req.translations.createNewInstance %>
+            </button>
+        </div>
+
+        <% if (req.query.err == "CREATED") { %>
+            <div class="liquid-glass border-emerald-500/20 p-6 rounded-[2rem] flex items-center gap-4 animate-in fade-in slide-in-from-top-4">
+                <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-emerald-500 uppercase tracking-tight">Deployment Successful</h3>
+                    <p class="text-xs text-zinc-500 mt-1">The instance has been queued for synchronization and initialization.</p>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Instances Table -->
+        <div id="instanceTable" class="liquid-glass rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02] border-b border-white/5">
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Designation</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">State</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Node</th>
+                            <th class="px-8 py-5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none text-right">Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/[0.02]">
+                        <% if (instances.length == 0) { %>
+                            <tr>
+                                <td colspan="4" class="px-8 py-20 text-center">
+                                    <p class="text-sm text-zinc-600 font-bold uppercase tracking-widest"><%= req.translations.noInstancesText %></p>
+                                </td>
+                            </tr>
+                        <% } %>
+                        <% instances.forEach(function(instance) { %>
+                        <tr class="hover:bg-white/[0.02] transition-colors group cursor-pointer" onclick="location.href='/instance/<%= instance.Id %>'">
+                            <td class="px-8 py-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-blue-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <p class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors"><%= instance.Name %></p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">ID: <%= instance.ContainerId ? instance.ContainerId.substring(0, 12) : 'N/A' %></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="px-3 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-[10px] font-bold text-zinc-400 uppercase tracking-tighter leading-none"><%= instance.InternalState %></span>
+                            </td>
+                            <td class="px-8 py-6">
+                                <span class="text-xs font-bold text-white"><%= instance.Node.name %></span>
+                            </td>
+                            <td class="px-8 py-6 text-right">
+                                <div class="flex justify-end gap-3 translate-x-2 group-hover:translate-x-0 transition-transform">
+                                    <% if (instance.suspended === true) { %>
+                                        <form action="/admin/instances/unsuspend/<%= instance.Id %>" method="POST" class="inline">
+                                            <button type="submit" onclick="event.stopPropagation();" class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all text-emerald-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </button>
+                                        </form>
+                                    <% } else { %>
+                                        <form action="/admin/instances/suspend/<%= instance.Id %>" method="POST" class="inline">
+                                            <button type="submit" onclick="event.stopPropagation();" class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500 hover:text-white transition-all text-amber-500">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                    <button onclick="location.href='/admin/instances/<%= instance.Id %>/edit'; event.stopPropagation();" class="p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all text-zinc-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </button>
+                                    <button onclick="location.href='/admin/instance/delete/<%= instance.Id %>'; event.stopPropagation();" class="p-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-rose-600 hover:text-white hover:border-rose-500 transition-all text-zinc-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+            <% if (typeof pagination !== 'undefined' && pagination) { %>
+            <div class="p-6 bg-white/[0.02] border-t border-white/5">
+                <%- include('../components/pagination', { pagination }) %>
+            </div>
+            <% } %>
+        </div>
+
+        <!-- Deployment Modal -->
+        <div id="instanceForm" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="liquid-glass rounded-[3rem] p-12 border border-blue-500/10 shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+                
+                <h3 class="text-2xl font-bold text-white mb-8">Deploy Infrastructure Unit</h3>
+                
+                <form id="deploymentForm" class="space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Primary Config -->
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Internal Designation</label>
+                                <input id="name" type="text" placeholder="production-db-01" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Assign Authority</label>
+                                    <select id="user" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                                        <% users.forEach(function(u) { %>
+                                            <option value="<%= u.userId %>" class="bg-zinc-900"><%= u.username %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Compute Unit</label>
+                                    <select id="node" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                                        <% nodes.forEach(function(n) { %>
+                                            <option value="<%= n.id %>" class="bg-zinc-900"><%= n.name %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Virtual Environment</label>
+                                <select id="image" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                                    <% images.forEach(function(im) { %>
+                                        <option value="<%= im.Image %>" class="bg-zinc-900" 
+                                            data-configfilepath="<%= im.ConfigFilePath %>" 
+                                            data-imagename="<%= im.Name %>" 
+                                            data-configfilecontent="<%= im.ConfigFileContent %>" 
+                                            data-variables="<%= JSON.stringify(im.Variables) %>">
+                                            <%= im.Name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Resource Provisioning -->
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">RAM (MiB)</label>
+                                    <input id="memory" type="number" placeholder="2048" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">CPU Logic Units</label>
+                                    <input id="cpu" type="number" placeholder="1" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Disk (MiB)</label>
+                                    <input id="disk" type="number" placeholder="10240" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Primary Port</label>
+                                    <input id="primary" type="number" placeholder="25565" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Network Mapping</label>
+                                <input id="ports" type="text" placeholder="25565:25565,8080:8080" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all placeholder:text-zinc-700">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Environment Variables Injection -->
+                    <div id="secondCard" class="hidden pt-10 border-t border-white/[0.03] space-y-6">
+                        <h4 class="text-sm font-bold text-white uppercase tracking-widest leading-none">Environment Injection</h4>
+                        <div id="variablesForm" class="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+                    </div>
+
+                    <div class="mt-12 flex gap-4 pt-8 border-t border-white/[0.03]">
+                        <button id="createNodeBtn" type="button" class="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-95">
+                            Execute Deployment
+                        </button>
+                        <button onclick="window.location.reload()" type="button" class="px-10 py-4 bg-white/5 border border-white/10 text-zinc-400 hover:text-white text-xs font-bold rounded-2xl transition">
+                            Cancel Operation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Logic preserved and polished for the new UI
+    document.getElementById('createButton').onclick = () => {
+        document.getElementById('instanceTable').classList.add('hidden');
+        document.getElementById('instanceForm').classList.remove('hidden');
+        document.getElementById('createButton').classList.add('hidden');
+    };
+
+    const imgSelect = document.getElementById('image');
+    imgSelect.onchange = () => {
+        const opt = imgSelect.options[imgSelect.selectedIndex];
+        const vars = opt.dataset.variables ? JSON.parse(opt.dataset.variables) : null;
+        const container = document.getElementById('secondCard');
+        const form = document.getElementById('variablesForm');
+        
+        if(vars) {
+            container.classList.remove('hidden');
+            form.innerHTML = '';
+            for(let key in vars) {
+                const v = vars[key];
+                form.innerHTML += `
+                    <div>
+                        <label class="text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-2 ml-2">${key}</label>
+                        <input type="text" name="${key}" value="${v.default || ''}" class="w-full px-5 py-3.5 bg-white/[0.02] border border-white/5 rounded-xl text-white text-xs outline-none focus:ring-1 focus:ring-blue-500/20" ${v.required ? 'required' : ''}>
+                    </div>
+                `;
+            }
+        } else {
+            container.classList.add('hidden');
+        }
+    };
+
+    document.getElementById('createNodeBtn').onclick = async function() {
+        const btn = this;
+        btn.textContent = 'Synchronizing...';
+        btn.disabled = true;
+
+        const data = {
+            name: document.getElementById('name').value,
+            image: imgSelect.value,
+            imagename: imgSelect.options[imgSelect.selectedIndex].dataset.imagename,
+            nodeId: document.getElementById('node').value,
+            user: document.getElementById('user').value,
+            memory: document.getElementById('memory').value,
+            cpu: document.getElementById('cpu').value,
+            disk: document.getElementById('disk').value,
+            ports: document.getElementById('ports').value,
+            primary: document.getElementById('primary').value,
+            configFilePath: imgSelect.options[imgSelect.selectedIndex].dataset.configfilepath,
+            configFileContent: imgSelect.options[imgSelect.selectedIndex].dataset.configfilecontent.replace('{{primaryPort}}', document.getElementById('primary').value),
+            variables: JSON.stringify(Array.from(document.querySelectorAll('#variablesForm input')).reduce((a, i) => ({...a, [i.name]: i.value}), {}))
+        };
+
+        const query = Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&');
+        const res = await fetch(`/instances/deploy?${query}`);
+        if(res.ok) window.location.href = '../admin/instances?err=CREATED';
+        else {
+            let errorMsg = 'Deployment Handshake Failed.';
+            try {
+                const errData = await res.json();
+                if (errData.details && typeof errData.details === 'object') {
+                    errorMsg = `Deployment Handshake Failed.\n\nReason: ${errData.error || 'Unknown'}\nDetails: ${JSON.stringify(errData.details)}`;
+                } else if (errData.details) {
+                    errorMsg = `Deployment Handshake Failed.\n\nReason: ${errData.details}`;
+                } else if (errData.error) {
+                    errorMsg = `Deployment Handshake Failed.\n\nReason: ${errData.error}`;
+                }
+            } catch(e) {}
+            alert(errorMsg);
+            btn.textContent = 'Execute Deployment';
+            btn.disabled = false;
+        }
+    };
+</script>
+<%- include('../components/footer') %>

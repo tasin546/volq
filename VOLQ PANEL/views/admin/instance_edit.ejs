@@ -1,0 +1,143 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-white/5 pb-12">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Infrastructure Reconfiguration</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Edit Instance: <%= instance.Name %></h2>
+                <p class="text-zinc-500 text-sm font-medium">Coordinate resource allocation and environment parameters for this unit.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-blue-500 shadow-2xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Interface -->
+        <div class="liquid-glass rounded-[3rem] p-12 border border-white/5 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-blue-600/5 rounded-full blur-[100px]"></div>
+            
+            <form id="editForm" class="space-y-12">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Identity & Logic -->
+                    <div class="space-y-8">
+                        <h3 class="text-[10px] font-bold text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                            <span class="w-8 h-px bg-blue-500"></span>
+                            Unit Classification
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Internal Designation</label>
+                                <input id="name" type="text" value="<%= instance.Name %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Authority Oversight</label>
+                                    <select id="user" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                                        <% users.forEach(function(u) { %>
+                                            <option value="<%= u.userId %>" class="bg-zinc-900" <%= instance.User === u.userId ? 'selected' : '' %>><%= u.username %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Environment Image</label>
+                                    <select id="image" class="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm appearance-none focus:ring-1 focus:ring-blue-500/30 outline-none">
+                                        <% images.forEach(function(im) { %>
+                                            <option value="<%= im.Image %>" class="bg-zinc-900" data-configfilepath="<%= im.ConfigFilePath %>" data-configfilecontent="<%= im.ConfigFileContent %>" <%= instance.Image === im.Image ? 'selected' : '' %>>
+                                                <%= im.Name %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resource Entitlement -->
+                    <div class="space-y-8">
+                        <h3 class="text-[10px] font-bold text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                            <span class="w-8 h-px bg-emerald-500"></span>
+                            Hardware Allocation
+                        </h3>
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Memory (MiB)</label>
+                                    <input id="memory" type="number" value="<%= instance.Memory %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">CPU Logic</label>
+                                    <input id="cpu" type="number" value="<%= instance.Cpu %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Disk (MiB)</label>
+                                    <input id="disk" type="number" value="<%= instance.Disk || 0 %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Host Signal</label>
+                                    <input id="primary" type="number" value="<%= instance.Primary %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block mb-3 ml-2">Network Mapping</label>
+                                <input id="ports" type="text" value="<%= instance.Ports %>" class="w-full px-6 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-sm focus:ring-1 focus:ring-blue-500/30 outline-none transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-10 border-t border-white/[0.03] flex flex-col sm:flex-row gap-6">
+                    <button id="editInstanceBtn" type="button" class="px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[2rem] transition shadow-3xl shadow-blue-500/20 active:scale-95">
+                        Synchronize Redirect
+                    </button>
+                    <button type="button" onclick="location.href='/admin/instances'" class="px-12 py-5 bg-white/5 border border-white/10 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[2rem] transition">
+                        Abort Protocol
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script>
+    document.getElementById('editInstanceBtn').onclick = async function() {
+        const btn = this;
+        btn.textContent = 'RECONFIGURING...';
+        btn.disabled = true;
+
+        const data = {
+            name: document.getElementById('name').value,
+            image: document.getElementById('image').value,
+            nodeId: '<%= instance.Node.id %>',
+            user: document.getElementById('user').value,
+            memory: document.getElementById('memory').value,
+            cpu: document.getElementById('cpu').value,
+            disk: document.getElementById('disk').value || '0',
+            ports: document.getElementById('ports').value,
+            primary: document.getElementById('primary').value,
+            configFilePath: document.getElementById('image').options[document.getElementById('image').selectedIndex].dataset.configfilepath,
+            configFileContent: document.getElementById('image').options[document.getElementById('image').selectedIndex].dataset.configfilecontent.replace('{{primaryPort}}', document.getElementById('primary').value)
+        };
+
+        const query = Object.keys(data).map(k => `${k}=${encodeURIComponent(data[k])}`).join('&');
+        try {
+            const res = await fetch(`/instances/redeploy/<%= instance.Id %>?${query}`);
+            if(res.ok) window.location.href = '/admin/instances?err=EDITED';
+            else throw new Error();
+        } catch(e) {
+            alert('Reconfiguration failed.');
+            btn.textContent = 'Synchronize Redirect';
+            btn.disabled = false;
+        }
+    };
+</script>
+<%- include('../components/footer') %>

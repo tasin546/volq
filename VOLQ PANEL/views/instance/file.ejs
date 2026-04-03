@@ -1,0 +1,117 @@
+<%- include('../components/template') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.js"></script>
+
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <% 
+        let formattedFile = req.query.path ? '/' + req.params.file : req.params.file;
+        let query = req.query.path ? '?path=' + req.query.path : '';
+    %>
+
+    <!-- Header & Action Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Resource Architect</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.params.file %></h2>
+            <div class="flex items-center gap-4 text-zinc-500 text-sm font-medium">
+                <span class="font-mono text-[11px] uppercase tracking-widest text-zinc-600">nexus://app/data/</span>
+                <span class="text-zinc-400 font-mono text-[11px] truncate max-w-[400px]"><%= (req.query.path || '') + formattedFile %></span>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="/instance/<%= req.params.id %>/files<%= query %>" class="px-8 py-3.5 bg-white/[0.03] border border-white/5 hover:border-white/10 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition active:scale-95">
+                Discard
+            </a>
+            <button id="saveButton" onclick="saveFile()" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-blue-500/20 active:scale-95 flex items-center gap-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                Commit Changes
+            </button>
+        </div>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <!-- Editor Matrix -->
+    <div class="liquid-glass rounded-[3.5rem] border border-white/5 shadow-4xl overflow-hidden relative h-[700px] group transition-all duration-500 hover:border-white/10">
+        <div id="editor" class="h-full w-full"></div>
+        <textarea id="file-content" class="hidden"><%- file %></textarea>
+        <div class="absolute bottom-6 right-8 px-4 py-2 bg-black/60 backdrop-blur-md rounded-xl border border-white/5 text-[9px] font-black text-zinc-500 uppercase tracking-widest select-none pointer-events-none transition-opacity group-hover:opacity-100 opacity-40">
+            Nexus Protocol v1.0.0 // Encrypted Stream
+        </div>
+    </div>
+</main>
+
+<%
+    const ext = formattedFile.split('.').pop();
+    const lang = ext === 'js' ? 'javascript' : ext === 'json' ? 'json' : ext === 'html' ? 'html' : ext === 'css' ? 'css' : ext === 'ts' ? 'typescript' : ext === 'md' ? 'markdown' : ext === 'py' ? 'python' : ext === 'sh' ? 'shell' : ext === 'yml' ? 'yaml' : 'plaintext';
+%>
+
+<script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
+        monaco.editor.defineTheme('nexus-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [],
+            colors: {
+                'editor.background': '#00000000',
+                'editor.lineHighlightBackground': '#ffffff05',
+                'editorCursor.foreground': '#3b82f6',
+                'editorIndentGuide.background': '#ffffff08',
+                'editorIndentGuide.activeBackground': '#3b82f630'
+            }
+        });
+
+        window.editor = monaco.editor.create(document.getElementById('editor'), {
+            value: document.getElementById('file-content').value,
+            language: '<%= lang %>',
+            theme: 'nexus-dark',
+            automaticLayout: true,
+            fontSize: 14,
+            fontFamily: "'JetBrains Mono', monospace",
+            minimap: { enabled: true, opacity: 0.5 },
+            lineNumbers: 'on',
+            roundedSelection: true,
+            scrollBeyondLastLine: false,
+            readOnly: false,
+            cursorStyle: 'line',
+            cursorBlinking: 'smooth'
+        });
+
+        window.onkeydown = (e) => {
+            if((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveFile();
+            }
+        }
+    });
+
+    function saveFile() {
+        const btn = document.getElementById('saveButton');
+        btn.disabled = true;
+        btn.textContent = 'COMMITTING...';
+        
+        fetch(`/instance/<%= req.params.id %>/files/edit/<%= req.params.file %><%= query %>`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: window.editor.getValue() })
+        }).then(r => r.json()).then(d => {
+            btn.textContent = 'COMMITTED';
+            btn.classList.replace('bg-blue-600', 'bg-emerald-600');
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = 'Commit Changes';
+                btn.classList.replace('bg-emerald-600', 'bg-blue-600');
+            }, 2000);
+        }).catch(() => {
+            btn.textContent = 'FAILED';
+            btn.classList.replace('bg-blue-600', 'bg-rose-600');
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.textContent = 'Commit Changes';
+                btn.classList.replace('bg-rose-600', 'bg-blue-600');
+            }, 2000);
+        });
+    }
+</script>
+<%- include('../components/footer') %>

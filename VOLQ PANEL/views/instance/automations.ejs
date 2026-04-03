@@ -1,0 +1,243 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16 space-y-12" id="content">
+    <!-- Header Protocol -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 border-b border-white/5 pb-10">
+        <div class="space-y-2">
+            <div class="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Chrono Protocol</div>
+            <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Automation Matrix</h2>
+            <p class="text-zinc-500 text-sm font-medium">Coordinate autonomous task execution and recurring system operations.</p>
+        </div>
+
+        <button id="save-button" class="px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-blue-500/20 active:scale-95 flex items-center gap-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+            Commit Workflow
+        </button>
+    </div>
+
+    <%- include('../components/instance') %>
+
+    <div class="flex flex-col lg:flex-row gap-10 h-[700px]">
+        <!-- Logic Modules -->
+        <div id="action-blocks" class="w-full lg:w-80 liquid-glass p-8 rounded-[3rem] border border-white/5 shadow-2xl space-y-8 flex-shrink-0">
+            <div class="space-y-1">
+                <h3 class="text-lg font-bold text-white tracking-tight leading-none">Logic Ledger</h3>
+                <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1">Draggable Primitives</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="action-block p-6 bg-indigo-600/10 border border-indigo-500/20 rounded-3xl cursor-grab active:cursor-grabbing hover:bg-indigo-600/20 transition-all group" draggable="true" data-type="interval">
+                    <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-4 group-hover:text-indigo-300 transition-colors">Temporal Trigger</span>
+                    <select class="interval-select w-full bg-black/40 border border-white/5 rounded-xl text-white text-[10px] p-3 outline-none focus:ring-1 focus:ring-indigo-500/30">
+                        <option value="0.5">Every 30m</option>
+                        <option value="1">1 Hour</option>
+                        <option value="24">Daily</option>
+                        <option value="168">Weekly</option>
+                    </select>
+                </div>
+
+                <div class="action-block p-6 bg-emerald-600/10 border border-emerald-500/20 rounded-3xl cursor-grab active:cursor-grabbing hover:bg-emerald-600/20 transition-all group" draggable="true" data-type="power">
+                    <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest block mb-4 group-hover:text-emerald-300 transition-colors">Power Directive</span>
+                    <select class="power-action-select w-full bg-black/40 border border-white/5 rounded-xl text-white text-[10px] p-3 outline-none focus:ring-1 focus:ring-emerald-500/30">
+                        <option value="start">START</option>
+                        <option value="stop">TERMINATE</option>
+                        <option value="restart">REBOOT</option>
+                    </select>
+                </div>
+
+                <div class="action-block p-6 bg-purple-600/10 border border-purple-500/20 rounded-3xl cursor-grab active:cursor-grabbing hover:bg-purple-600/20 transition-all group" draggable="true" data-type="webhook">
+                    <span class="text-[10px] font-black text-purple-400 uppercase tracking-widest block mb-4 group-hover:text-purple-300 transition-colors">Data Ingress</span>
+                    <input type="text" placeholder="https://endpoint-url" class="w-full bg-black/40 border border-white/5 rounded-xl text-white text-[10px] p-3 outline-none focus:ring-1 focus:ring-purple-500/30 placeholder:text-zinc-800">
+                </div>
+            </div>
+        </div>
+
+        <!-- Matrix Workspace -->
+        <div id="workspace" data-workflow="<%= JSON.stringify(workflow).replace(/"/g, '&quot;') %>" class="flex-1 liquid-glass rounded-[3.5rem] border border-white/5 shadow-4xl relative overflow-hidden group">
+            <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" style="background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px); background-size: 40px 40px;"></div>
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-600/[0.02] to-transparent pointer-events-none"></div>
+            
+            <div id="workspace-placeholder" class="absolute inset-0 flex items-center justify-center flex-col gap-4 text-center z-10 pointer-events-none transition-opacity duration-500">
+                <div class="w-16 h-16 bg-white/[0.02] border border-white/5 rounded-3xl flex items-center justify-center text-zinc-700">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+                <p class="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">Matrix Empty // Drag Logic Modules to Initialize</p>
+            </div>
+
+            <svg id="connectors" class="absolute inset-0 pointer-events-none z-0"></svg>
+        </div>
+    </div>
+</main>
+
+<style>
+    .block-item { 
+        position: absolute; 
+        z-index: 50; 
+        width: 240px; 
+        filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+    }
+    .connector { 
+        stroke: #3b82f6; 
+        stroke-width: 3; 
+        fill: none; 
+        stroke-linecap: round; 
+        filter: drop-shadow(0 0 8px rgba(59,130,246,0.3));
+    }
+    .connection-point { 
+        width: 14px; 
+        height: 14px; 
+        background: #3b82f6; 
+        border: 3px solid #000; 
+        border-radius: 50%; 
+        position: absolute; 
+        top: 50%; 
+        cursor: pointer; 
+        z-index: 60; 
+        box-shadow: 0 0 10px rgba(59,130,246,0.5);
+    }
+    .connection-point[data-position="left"] { left: -7px; }
+    .connection-point[data-position="right"] { right: -7px; }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let dragged = null;
+        let off = { x: 0, y: 0 };
+        const ws = document.getElementById('workspace');
+        const connSvg = document.getElementById('connectors');
+        const saveBtn = document.getElementById('save-button');
+        const ph = document.getElementById('workspace-placeholder');
+        const acts = document.getElementById('action-blocks');
+        let conns = [];
+        let idCounter = 0;
+
+        const saved = JSON.parse(ws.dataset.workflow || '{}');
+
+        acts.addEventListener('dragstart', e => {
+            const clone = createBlock(e.target.dataset.type);
+            ws.appendChild(clone);
+            dragged = clone;
+            off = { x: e.offsetX, y: e.offsetY };
+        });
+
+        ws.addEventListener('dragover', e => {
+            e.preventDefault();
+            if(dragged) moveBlock(dragged, e.clientX, e.clientY);
+        });
+
+        ws.addEventListener('drop', () => { if(dragged) initPoints(dragged); dragged = null; updatePH(); });
+        ws.onmousedown = (e) => {
+            const b = e.target.closest('.block-item');
+            if(b) { dragged = b; off = { x: e.clientX - b.getBoundingClientRect().left, y: e.clientY - b.getBoundingClientRect().top }; }
+        };
+
+        window.onmousemove = (e) => { if(dragged) { moveBlock(dragged, e.clientX, e.clientY); drawAll(); } };
+        window.onmouseup = () => dragged = null;
+
+        function moveBlock(b, cx, cy) {
+            const r = ws.getBoundingClientRect();
+            b.style.left = (cx - r.left - off.x) + 'px';
+            b.style.top = (cy - r.top - off.y) + 'px';
+        }
+
+        function createBlock(type) {
+            const t = acts.querySelector(`[data-type="${type}"]`);
+            const c = t.cloneNode(true);
+            c.classList.replace('action-block', 'block-item');
+            c.classList.add('liquid-glass', 'p-6', 'rounded-[2rem]', 'border', 'border-white/10');
+            c.dataset.id = idCounter++;
+            return c;
+        }
+
+        function initPoints(b) {
+            ['left', 'right'].forEach(p => {
+                const pt = document.createElement('div');
+                pt.className = 'connection-point';
+                pt.dataset.position = p;
+                b.appendChild(pt);
+                pt.onmousedown = (e) => { e.stopPropagation(); startConn(pt); };
+            });
+        }
+
+        let curConn = null;
+        function startConn(p) {
+            if(p.dataset.position === 'right') {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('class', 'connector');
+                connSvg.appendChild(path);
+                curConn = { start: p, path };
+                window.onmousemove = (e) => {
+                    const r = ws.getBoundingClientRect();
+                    const s = getPos(p);
+                    const ePos = { x: e.clientX - r.left, y: e.clientY - r.top };
+                    draw(s, ePos, path);
+                };
+                window.onmouseup = (e) => {
+                    window.onmousemove = null;
+                    const endP = e.target.closest('.connection-point');
+                    if(endP && endP.dataset.position === 'left' && endP.parentElement !== p.parentElement) {
+                        conns.push({ ...curConn, end: endP });
+                        drawAll();
+                    } else { connSvg.removeChild(path); }
+                    curConn = null;
+                    window.onmousemove = (e) => { if(dragged) { moveBlock(dragged, e.clientX, e.clientY); drawAll(); } };
+                }
+            }
+        }
+
+        function getPos(p) {
+            const r = ws.getBoundingClientRect();
+            const pr = p.getBoundingClientRect();
+            return { x: pr.left - r.left + 7, y: pr.top - r.top + 7 };
+        }
+
+        function draw(s, e, p) {
+            const mx = (s.x + e.x) / 2;
+            p.setAttribute('d', `M ${s.x},${s.y} C ${mx},${s.y} ${mx},${e.y} ${e.x},${e.y}`);
+        }
+
+        function drawAll() { conns.forEach(c => draw(getPos(c.start), getPos(c.end), c.path)); }
+
+        function updatePH() { ph.style.opacity = ws.querySelectorAll('.block-item').length ? '0' : '1'; }
+
+        if(saved && saved.blocks) {
+            saved.blocks.forEach(b => {
+                const el = createBlock(b.type);
+                el.style.left = b.x + 'px'; el.style.top = b.y + 'px';
+                el.dataset.id = b.id;
+                ws.appendChild(el);
+                initPoints(el);
+                const s = el.querySelector('select'); if(s) s.value = b.meta.selectedValue;
+                const i = el.querySelector('input'); if(i) i.value = b.meta.inputValue;
+                idCounter = Math.max(idCounter, b.id + 1);
+            });
+            if(saved.connections) {
+                saved.connections.forEach(c => {
+                    const s = ws.querySelector(`[data-id="${c.from}"] .connection-point[data-position="right"]`);
+                    const e = ws.querySelector(`[data-id="${c.to}"] .connection-point[data-position="left"]`);
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('class', 'connector');
+                    connSvg.appendChild(path);
+                    conns.push({ start: s, end: e, path });
+                });
+            }
+            drawAll(); updatePH();
+        }
+
+        saveBtn.onclick = async () => {
+            const bD = [...ws.querySelectorAll('.block-item')].map(b => ({
+                id: b.dataset.id, type: b.dataset.type,
+                x: parseFloat(b.style.left), y: parseFloat(b.style.top),
+                meta: { selectedValue: b.querySelector('select')?.value, inputValue: b.querySelector('input')?.value }
+            }));
+            const cD = conns.map(c => ({ from: c.start.parentElement.dataset.id, to: c.end.parentElement.dataset.id }));
+            
+            const r = await fetch('/instance/<%= req.params.id %>/automations/save-workflow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blocks: bD, connections: cD })
+            });
+            if((await r.json()).success) alert('MATRIX SYNCHRONIZED');
+        }
+    });
+</script>
+<%- include('../components/footer') %>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html class="h-full bg-[#111114]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %> | Security Step</title>
+    <link href="../assets/tailwind.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+        }
+        body { font-family: 'Public Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#111114] h-full flex items-center justify-center p-6 overflow-hidden">
+    <!-- Atmospheric Elements -->
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="absolute top-[-10%] right-[-10%] w-[50rem] h-[50rem] bg-amber-600/5 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[50rem] h-[50rem] bg-blue-600/5 rounded-full blur-[120px]"></div>
+    </div>
+
+    <div class="w-full max-w-[500px] relative z-10">
+        <!-- 2FA Card -->
+        <div class="liquid-glass p-12 lg:p-16 rounded-[3rem] border border-white/5 shadow-3xl relative overflow-hidden group">
+            <div class="relative z-10 space-y-10">
+                <div class="space-y-4 text-center">
+                    <div class="w-12 h-12 bg-amber-600 rounded-2xl flex items-center justify-center font-black text-white text-xl mx-auto mb-6 shadow-2xl shadow-amber-500/20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 21a10.003 10.003 0 008.382-4.516M12 11c2.33 0 4.314-.451 5.636-2.042M12 11V7a3 3 0 00-3-3H4m8 7V3m0 0l-3 3m3-3l3 3" /></svg>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="px-3 py-1 bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] font-bold rounded-lg w-max mx-auto tracking-tighter uppercase">Security Protocol</div>
+                        <h2 class="text-3xl font-extrabold text-white tracking-tight">Two-Factor Auth</h2>
+                        <p class="text-zinc-500 text-sm font-medium leading-relaxed">Please enter the 6-character code from your authenticator device.</p>
+                    </div>
+                </div>
+
+                <form action="/2fa" method="POST" class="space-y-8">
+                    <div class="space-y-4">
+                        <div class="flex justify-center">
+                            <input id="token" name="token" type="text" placeholder="000000" maxlength="6" required autofocus class="w-full max-w-[280px] px-8 py-5 bg-white/[0.03] border border-white/5 rounded-2xl text-white text-3xl font-black text-center tracking-[0.5em] focus:ring-2 focus:ring-amber-500/30 outline-none transition-all placeholder:text-zinc-800">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-5 bg-white hover:bg-zinc-200 text-zinc-900 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl transition shadow-3xl shadow-white/5 active:scale-95">
+                        Verify Identity
+                    </button>
+                    
+                    <div class="text-center pt-4">
+                        <a href="/auth/logout" class="text-[10px] font-bold text-zinc-600 hover:text-white uppercase tracking-widest transition-colors inline-block">Cancel Authentication</a>
+                    </div>
+
+                    <% if (req.query.err) { %>
+                        <div class="text-center">
+                            <span class="text-rose-500 text-[10px] font-bold uppercase tracking-widest leading-none">Invalid Protocol Token</span>
+                        </div>
+                    <% } %>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

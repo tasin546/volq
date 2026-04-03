@@ -1,0 +1,192 @@
+<%- include('components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Resource Overview</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.instances %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.viewInstances %></p>
+            </div>
+            <% if (req.user.admin === true) { %>
+                <div class="px-4 py-2 liquid-glass rounded-2xl flex items-center gap-4">
+                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Scope:</span>
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" id="instance-toggle" class="sr-only peer" <%= req.query.see === 'other' ? 'checked' : '' %>>
+                        <div class="w-11 h-6 bg-white/5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 transition-colors"></div>
+                        <span class="ml-3 text-[10px] font-bold text-zinc-400 group-hover:text-white transition-colors uppercase tracking-widest"><%= req.query.see === 'other' ? 'All Units' : 'Your Units' %></span>
+                    </label>
+                </div>
+            <% } %>
+        </div>
+
+        <% if (req.query.err == "NOTACTIVEYET") { %>
+            <div class="liquid-glass border-amber-500/20 p-6 rounded-[2rem] flex items-center gap-4">
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-amber-500 uppercase tracking-tight">Syncing Virtualization</h3>
+                    <p class="text-xs text-zinc-500 mt-1">The instance is either initializing or in a recovery state.</p>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Instances Grid -->
+        <% if (instances.length == 0) { %>
+            <div class="liquid-glass rounded-[3rem] p-24 text-center border-dashed border-white/5">
+                <div class="w-20 h-20 bg-white/[0.02] rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2"><%= req.translations.noInstances %></h3>
+                <p class="text-sm text-zinc-500"><%= req.translations.noInstancesText %></p>
+            </div>
+        <% } else { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <% instances.forEach(function (instance) { %>
+                    <div data-instance-id="<%= instance.Id %>" onclick="window.location.href = '../instance/<%= instance.Id %>';" class="liquid-glass glass-shine p-8 rounded-[2.5rem] group cursor-pointer border border-white/5 transition-all hover:translate-y-[-4px] hover:border-blue-500/30">
+                        <div class="flex justify-between items-start mb-8">
+                            <div class="flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-blue-500 transition-colors group-hover:bg-blue-500/10">
+                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <h4 class="text-lg font-bold text-white group-hover:text-blue-400 transition-colors truncate"><%= instance.Name %></h4>
+                                    <p class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mt-0.5"><%= instance.Id %></p>
+                                </div>
+                            </div>
+                            <div data-status-bg class="px-3 py-1 bg-white/5 rounded-lg border border-white/5">
+                                <span data-status class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                                    Syncing...
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+                            <div>
+                                <p class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">Memory</p>
+                                <div class="flex items-baseline gap-1.5">
+                                    <span data-ram-usage class="text-base font-bold text-zinc-300">...</span>
+                                    <span class="text-[10px] text-zinc-600 font-bold">RAM</span>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest mb-1.5">Processor</p>
+                                <div class="flex items-baseline gap-1.5">
+                                    <span data-cpu-usage class="text-base font-bold text-zinc-300">...</span>
+                                    <span class="text-[10px] text-zinc-600 font-bold">CPU</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="mt-8 h-1.5 w-full bg-white/[0.02] rounded-full overflow-hidden border border-white/5">
+                            <div id="ram-progress-<%= instance.Id %>" class="h-full bg-gradient-to-r from-blue-600 to-indigo-600 w-0 transition-all duration-1000"></div>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleSwitch = document.getElementById('instance-toggle');
+        if (toggleSwitch) {
+            toggleSwitch.addEventListener('change', function () {
+                window.location.href = this.checked ? '/instances?see=other' : '/instances';
+            });
+        }
+
+        const instances = document.querySelectorAll('[data-instance-id]');
+        instances.forEach(instance => {
+            const containerId = instance.dataset.instanceId;
+
+            const statusElement = instance.querySelector('[data-status]');
+            const statusBg = instance.querySelector('[data-status-bg]');
+            const ramUsageElement = instance.querySelector('[data-ram-usage]');
+            const cpuUsageElement = instance.querySelector('[data-cpu-usage]');
+            const ramProgress = document.getElementById(`ram-progress-${containerId}`);
+
+            function formatBytes(bytes, decimals = 2) {
+                if (bytes === 0) return '0.00 B';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['B', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            }
+
+            let retryTimer = null;
+            let activeSocket = null;
+
+            function connectStats() {
+                if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+                const isSecure = window.location.protocol === 'https:';
+                const wsProtocol = isSecure ? 'wss' : 'ws';
+                const wsPort = isSecure ? '' : `:<%= config.port %>`;
+                const sock = new WebSocket(`${wsProtocol}://<%= config.domain %>${wsPort}/stats/${containerId}`);
+                activeSocket = sock;
+
+                sock.onmessage = event => {
+                    let stats;
+                    try {
+                        stats = JSON.parse(event.data);
+                    } catch (e) {
+                        if (event.data.includes('Offline') || event.data.includes('down')) {
+                            statusBg.className = 'px-3 py-1 bg-red-500/10 rounded-lg border border-red-500/20';
+                            statusElement.className = 'text-[9px] font-bold text-red-500 uppercase tracking-widest';
+                            statusElement.textContent = 'Offline';
+                            ramUsageElement.textContent = '0 MB';
+                            cpuUsageElement.textContent = '0%';
+                        }
+                        return;
+                    }
+
+                    if (stats && stats.state) {
+                        const s = stats.state;
+                        if (s === 'INSTALLING') {
+                            statusElement.textContent = 'Installing...';
+                        } else if (s === 'FAILED') {
+                            statusBg.className = 'px-3 py-1 bg-red-500/10 rounded-lg border border-red-500/20';
+                            statusElement.className = 'text-[9px] font-bold text-red-500 uppercase tracking-widest';
+                            statusElement.textContent = 'Failed';
+                        }
+                        return;
+                    }
+
+                    if (stats && !stats.error) {
+                        const ramUsageRaw = stats.memory_stats.usage / 1024;
+                        const ramLimitRaw = stats.memory_stats.limit / 1024;
+                        const ramUsage = formatBytes(ramUsageRaw);
+                        ramUsageElement.textContent = ramUsage;
+
+                        const ramPercent = (ramUsageRaw / ramLimitRaw * 100).toFixed(0);
+                        if (ramProgress) ramProgress.style.width = `${ramPercent}%`;
+
+                        statusBg.className = 'px-3 py-1 bg-emerald-500/10 rounded-lg border border-emerald-500/20';
+                        statusElement.className = 'text-[9px] font-bold text-emerald-500 uppercase tracking-widest';
+                        statusElement.textContent = 'Active';
+
+                        const cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage;
+                        const systemCpuDelta = stats.cpu_stats.system_cpu_usage - stats.precpu_stats.system_cpu_usage;
+                        const cpuUsagePercent = (cpuDelta && systemCpuDelta)
+                            ? ((cpuDelta / systemCpuDelta) * 100).toFixed(1) + '%'
+                            : '0%';
+                        cpuUsageElement.textContent = cpuUsagePercent;
+                    }
+                };
+
+                sock.onclose = () => {
+                    retryTimer = setTimeout(connectStats, 5000);
+                };
+
+                sock.onerror = () => {};
+            }
+
+            connectStats();
+        });
+    });
+</script>
+<%- include('components/footer') %>

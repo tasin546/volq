@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#111114]">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= name %> | Secure Access Gate
+    </title>
+    <link rel="icon" href="/assets/logo.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/assets/logo.png" type="image/x-icon">
+    <!-- Use CDN for absolute reliability across different route depths -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,400,700,800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --accent-blue: #3b82f6;
+            --base-bg: #09090b;
+        }
+
+        body {
+            font-family: 'General Sans', sans-serif;
+            background-color: var(--base-bg);
+            background-image:
+                radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.06) 0%, transparent 40%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-glass {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-glass:focus {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .animate-float {
+            animation: float 10s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body
+    class="h-full flex items-center justify-center p-6 lg:p-12 overflow-hidden selection:bg-blue-500/30 selection:text-white">
+    <!-- Atmospheric Ambient Orbs -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div
+            class="absolute top-[-10%] right-[-5%] w-[60rem] h-[60rem] bg-blue-600/10 rounded-full blur-[140px] animate-float">
+        </div>
+        <div class="absolute bottom-[-15%] left-[-10%] w-[50rem] h-[50rem] bg-indigo-600/10 rounded-full blur-[120px] animate-float"
+            style="animation-delay: -5s;"></div>
+    </div>
+
+    <div class="w-full max-w-[1240px] grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center relative z-10">
+        <!-- Brand Narrative Side -->
+        <div class="hidden lg:flex flex-col space-y-10">
+            <div class="space-y-8">
+                <img src="/assets/logo.png" alt="Logo" class="w-14 h-14 rounded-[1.8rem] shadow-3xl shadow-blue-500/30">
+
+                <div class="space-y-6">
+                    <h1 class="text-7xl font-extrabold text-white tracking-tighter leading-[1] uppercase py-2">
+                        Mastering <br><span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-400">Infrastructure.</span>
+                    </h1>
+                    <p class="text-zinc-500 text-lg font-medium leading-relaxed max-w-md">
+                        The elite command interface for high-precision resource orchestration and hybrid cloud
+                        management.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-8 pt-4">
+                <div class="flex -space-x-4">
+                    <div
+                        class="w-10 h-10 rounded-full border-4 border-[#09090b] bg-zinc-800 flex items-center justify-center font-bold text-[8px] text-zinc-500 italic">
+                        OP1</div>
+                    <div
+                        class="w-10 h-10 rounded-full border-4 border-[#09090b] bg-zinc-700 flex items-center justify-center font-bold text-[8px] text-zinc-500 italic">
+                        OP2</div>
+                    <div
+                        class="w-10 h-10 rounded-full border-4 border-[#09090b] bg-zinc-600 flex items-center justify-center font-bold text-[8px] text-white">
+                        OP3</div>
+                </div>
+                <div class="h-8 w-px bg-white/5"></div>
+                <span class="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] leading-tight">
+                    Trusted by <br> elite operators
+                </span>
+            </div>
+        </div>
+
+        <!-- Authentication Nexus -->
+        <div class="liquid-glass p-10 lg:p-16 rounded-[3.5rem] relative group border border-white/10">
+            <div class="relative z-10 space-y-10">
+                <div class="space-y-3 text-center lg:text-left">
+                    <div
+                        class="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-black rounded-xl w-max tracking-[0.2em] uppercase lg:mx-0 mx-auto">
+                        Identity Validator
+                    </div>
+                    <h2 class="text-4xl font-black text-white tracking-tight leading-none uppercase">Login</h2>
+                    <p class="text-zinc-500 text-sm font-medium">Coordinate your access credentials to proceed.</p>
+                </div>
+
+                <form id="login-form" class="space-y-6" onsubmit="event.preventDefault(); submitForm();">
+                    <div class="space-y-3">
+                        <label
+                            class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] ml-2 block">Email</label>
+                        <input id="username" type="text" placeholder="Username or Protocol Address" required
+                            class="input-glass w-full px-8 py-4 rounded-2xl text-white text-sm outline-none placeholder:text-zinc-800 placeholder:italic">
+                    </div>
+
+                    <div class="space-y-3 relative group">
+                        <div class="flex justify-between px-2">
+                            <label
+                                class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] block">Password</label>
+                            <a href="/auth/reset-password"
+                                class="text-[9px] font-bold text-zinc-700 hover:text-blue-500 uppercase tracking-widest transition-colors">Lost?</a>
+                        </div>
+                        <input id="password" type="password" placeholder="••••••••••••" required
+                            class="input-glass w-full px-8 py-4 rounded-2xl text-white text-sm outline-none placeholder:text-zinc-800">
+                    </div>
+
+                    <div class="flex items-center justify-between px-2">
+                        <label class="relative inline-flex items-center cursor-pointer group">
+                            <input id="remember-me" type="checkbox" class="sr-only peer">
+                            <div
+                                class="w-9 h-5 bg-white/5 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-700 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600 peer-checked:after:bg-white transition-colors">
+                            </div>
+                            <span
+                                class="ml-4 text-[9px] font-bold text-zinc-600 uppercase tracking-widest cursor-pointer group-hover:text-zinc-400 transition-colors">Persist
+                                Session</span>
+                        </label>
+                    </div>
+
+                    <div class="pt-2">
+                        <button onclick="submitForm()"
+                            class="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition shadow-2xl shadow-blue-500/20 active:scale-[0.98]">
+                            Authorize
+                        </button>
+                    </div>
+
+                    <% if (settings.register) { %>
+                        <div class="pt-4 text-center border-t border-white/5">
+                            <span class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">New Unit?</span>
+                            <a href="/register"
+                                class="text-[9px] font-extrabold text-blue-500 hover:text-blue-400 uppercase tracking-widest ml-3 transition-colors underline decoration-2 underline-offset-8 decoration-blue-500/20 hover:decoration-blue-500">Register
+                                Base</a>
+                        </div>
+                        <% } %>
+
+                            <!-- Feedback Stream -->
+                            <div id="messages" class="text-center min-h-[20px]">
+                                <% if (req.query.err) { %>
+                                    <span
+                                        class="text-rose-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-rose-500/20 pb-1">
+                                        <%= req.query.err==='InvalidCredentials' ? 'Authentication Core Refused' :
+                                            req.query.err.toUpperCase() %>
+                                    </span>
+                                    <% } %>
+                                        <% if (req.query.msg) { %>
+                                            <span
+                                                class="text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-emerald-500/20 pb-1">
+                                                <%= req.query.msg.toUpperCase() %>
+                                            </span>
+                                            <% } %>
+                            </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface Controller -->
+    <script>
+        async function submitForm() {
+            const u = document.getElementById("username").value.trim();
+            const p = document.getElementById("password").value.trim();
+            if (!u || !p) return;
+
+            // Interaction feedback
+            const btn = document.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'VALIDATING IDENTITY...';
+            btn.disabled = true;
+            btn.classList.replace('bg-blue-600', 'bg-zinc-800');
+
+            setTimeout(() => {
+                window.location.href = `/auth/login?username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`;
+            }, 600);
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitForm();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<%- include('../../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-10">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">System Styling</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none">Theme Settings</h2>
+                <p class="text-zinc-500 text-sm font-medium">Manage the visual identity and workspace configuration of your VOLQ Panel.</p>
+            </div>
+        </div>
+
+        <%- include('../../components/settings') %>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            <!-- Active Theme Card -->
+            <div class="liquid-glass rounded-[3rem] p-12 border border-blue-500/10 shadow-2xl relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px]"></div>
+                
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M216,24H72A40,40,0,0,0,32,64v72a24,24,0,0,0,24,24h48l-7.89,46.67A8.42,8.42,0,0,0,96,208a32,32,0,0,0,64,0,8.42,8.42,0,0,0-.11-1.33L152,160h48a24,24,0,0,0,24-24V32A8,8,0,0,0,216,24ZM72,40H176V80a8,8,0,0,0,16,0V40h16v72H48V64A24,24,0,0,1,72,40Z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white leading-none">VOLQ Liquid Glass</h3>
+                        <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-widest mt-1">Default & Active</p>
+                    </div>
+                </div>
+
+                <p class="text-zinc-500 text-sm leading-relaxed mb-8">
+                    Custom themes have been disabled to ensure a consistent, high-performance experience. Your panel is locked to the <b>Liquid Glass</b> design for maximum visual fidelity and accessibility.
+                </p>
+
+                <div class="p-6 bg-white/[0.02] border border-white/5 rounded-2xl">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-zinc-400 uppercase tracking-widest">Theme Locked</span>
+                        <svg class="w-4 h-4 text-zinc-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Styling Options -->
+            <div class="space-y-6">
+                <!-- Sidebar Position -->
+                <div class="liquid-glass rounded-[2rem] p-8 border border-white/5">
+                    <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6 block ml-1 leading-none">Sidebar Configuration</h4>
+                    <form action="/admin/settings/change/theme/color" method="POST">
+                        <div class="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <div>
+                                <p class="text-xs font-bold text-white mb-1 tracking-tight">Sidebar Orientation</p>
+                                <p class="text-[10px] text-zinc-600 font-bold uppercase tracking-widest leading-none">Position: <%= theme['sidebar-direction'] %></p>
+                            </div>
+                            <input type="hidden" name="sidebardirection" value="toggle">
+                            <button type="submit" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-bold text-white transition active:scale-95 uppercase tracking-widest">
+                                Switch Side
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Footer Toggle -->
+                <div class="liquid-glass rounded-[2rem] p-8 border border-white/5">
+                    <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-[0.2em] mb-6 block ml-1 leading-none">Interface Components</h4>
+                    <form action="/admin/settings/toggle/theme/footer" method="POST">
+                        <div class="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl">
+                            <div>
+                                <p class="text-xs font-bold text-white mb-1 tracking-tight">System Credits</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest leading-none <%= settings.footer ? 'text-emerald-500' : 'text-rose-500' %>">
+                                    <%= settings.footer ? 'Visible' : 'Hidden' %>
+                                </p>
+                            </div>
+                            <button type="submit" class="px-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-[10px] font-bold text-white transition active:scale-95 uppercase tracking-widest">
+                                <%= settings.footer ? req.translations.disable : req.translations.enable %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<%- include('../../components/footer') %>

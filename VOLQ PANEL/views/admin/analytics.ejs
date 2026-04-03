@@ -1,0 +1,129 @@
+<%- include('../components/template') %>
+<main class="p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto space-y-12">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div class="space-y-2">
+                <div class="px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[9px] font-bold rounded-lg w-max mb-2 tracking-tighter uppercase leading-none">Telemetry Engine</div>
+                <h2 class="text-4xl font-extrabold tracking-tight text-white leading-none"><%= req.translations.analytics || 'Analytics' %></h2>
+                <p class="text-zinc-500 text-sm font-medium"><%= req.translations.analyticsText || 'Real-time traffic analysis and interface engagement metrics.' %></p>
+            </div>
+        </div>
+
+        <!-- Metric Tiles -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-blue-500/5 rounded-full blur-[60px]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Throughput</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-black text-white" id="totalRequests">--</span>
+                    <span class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest leading-none">Reqs</span>
+                </div>
+            </div>
+
+            <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/5 rounded-full blur-[60px]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Identity</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-black text-white" id="uniqueVisitors">--</span>
+                    <span class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest leading-none">Visitors</span>
+                </div>
+            </div>
+
+            <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-purple-500/5 rounded-full blur-[60px]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Frequency</span>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-black text-white" id="avgRequestsPerHour">--</span>
+                    <span class="text-[9px] text-zinc-600 font-bold uppercase tracking-widest leading-none">Req/H</span>
+                </div>
+            </div>
+
+            <div class="liquid-glass p-8 rounded-[2.5rem] border border-white/5 relative overflow-hidden group">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-rose-500/5 rounded-full blur-[60px]"></div>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] mb-4 block">Hot Endpoint</span>
+                <div class="text-xl font-black text-white truncate" id="topPage">--</div>
+            </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="liquid-glass p-10 rounded-[3rem] border border-white/5 shadow-2xl space-y-8">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-widest"><%= req.translations.trafficOverTime || 'Traffic Over Time' %></h3>
+                    <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                </div>
+                <div class="relative h-[300px]">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <div class="liquid-glass p-10 rounded-[3rem] border border-white/5 shadow-2xl space-y-8">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-widest"><%= req.translations.topPages || 'Top Pages' %></h3>
+                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                </div>
+                <div class="relative h-[300px]">
+                    <canvas id="topPagesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    fetch('/api/analytics')
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('totalRequests').textContent = data.totalRequests;
+        document.getElementById('uniqueVisitors').textContent = data.uniqueVisitors;
+        document.getElementById('avgRequestsPerHour').textContent = data.avgRequestsPerHour.toFixed(2);
+        document.getElementById('topPage').textContent = data.topPage;
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { weight: 'bold', size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: '#52525b', font: { weight: 'bold', size: 10 } } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        };
+
+        new Chart(document.getElementById('trafficChart'), {
+            type: 'line',
+            data: {
+                labels: data.trafficOverTime.labels,
+                datasets: [{
+                    data: data.trafficOverTime.data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 0
+                }]
+            },
+            options: commonOptions
+        });
+
+        new Chart(document.getElementById('topPagesChart'), {
+            type: 'bar',
+            data: {
+                labels: data.topPages.labels,
+                datasets: [{
+                    data: data.topPages.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: commonOptions
+        });
+    });
+</script>
+<%- include('../components/footer') %>

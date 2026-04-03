@@ -1,0 +1,90 @@
+<!doctype html>
+<html class="h-full w-full bg-[#111114]">
+   <head>
+      <title><%= name %></title>
+      <link rel="icon" href="/assets/logo.png" type="image/png">
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="/assets/tailwind.css" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+      <style>
+         .liquid-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+         }
+         .glass-shine {
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+         }
+         body { font-family: 'Public Sans', sans-serif; }
+         ::-webkit-scrollbar { width: 4px; }
+         ::-webkit-scrollbar-track { background: transparent; }
+         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+      </style>
+   </head>
+   <body class="bg-[#111114] text-zinc-400 h-full w-full overflow-hidden">
+      <div id="loader" class="fixed inset-0 z-[100] bg-[#111114] flex items-center justify-center transition-opacity duration-700">
+         <div class="relative w-24 h-24">
+            <div class="absolute inset-0 border-4 border-blue-600/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-t-blue-600 rounded-full animate-spin"></div>
+         </div>
+      </div>
+
+      <div class="flex h-full w-full">
+         <!-- Sidebar -->
+         <aside class="w-64 border-r border-white/5 bg-black/20 flex flex-col hidden lg:flex">
+            <div class="p-8">
+               <a href="/" class="flex items-center gap-3">
+                  <div class="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center font-black text-white px-2">V</div>
+                  <span class="text-white font-extrabold tracking-tighter text-xl"><%= name %></span>
+               </a>
+            </div>
+
+            <nav class="flex-1 px-6 space-y-1">
+               <p class="px-3 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-4">Core Navigation</p>
+               <a href="/admin/overview" class="flex items-center gap-3 px-3 py-3 rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.03] transition-all group">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                  <span class="text-xs font-bold uppercase tracking-widest">Back to Admin</span>
+               </a>
+               <a href="/admin/plugins" class="flex items-center gap-3 px-3 py-3 rounded-xl text-white bg-blue-600/10 border border-blue-500/20 shadow-lg shadow-blue-500/5 transition-all">
+                  <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a2 2 0 002 2h1a2 2 0 110 4h-1a2 2 0 00-2 2v1a2 2 0 11-4 0V11a2 2 0 012-2h1M5 8a2 2 0 012-2h1a2 2 0 010 4H7a2 2 0 01-2-2z" /></svg>
+                  <span class="text-xs font-bold uppercase tracking-widest">Plugins Center</span>
+               </a>
+
+               <div class="pt-8">
+                  <p class="px-3 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em] mb-4">Addons Manager</p>
+                  <% Object.keys(pluginSidebar).forEach(plugin => { %>
+                     <a href="<%= pluginSidebar[plugin] %>" class="flex items-center gap-3 px-3 py-3 rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.03] transition-all">
+                        <div class="w-1.5 h-1.5 rounded-full bg-zinc-700"></div>
+                        <span class="text-xs font-bold uppercase tracking-widest"><%= plugin %></span>
+                     </a>
+                  <% }) %>
+               </div>
+            </nav>
+
+            <div class="p-6">
+                <a href="/auth/logout" class="flex items-center gap-3 px-3 py-3 rounded-xl text-rose-500/50 hover:text-rose-500 hover:bg-rose-500/5 transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em]">Terminate</span>
+                </a>
+            </div>
+         </aside>
+
+         <!-- Main Content Area -->
+         <div class="flex-1 flex flex-col overflow-hidden relative">
+            <header class="h-20 border-b border-white/5 flex items-center justify-between px-10 bg-black/10">
+               <div class="flex items-center gap-4">
+                  <div class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Addon Environment</div>
+               </div>
+               <div class="flex items-center gap-6">
+                  <div class="flex items-center gap-3 px-4 py-2 bg-white/[0.03] rounded-2xl border border-white/5">
+                     <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                     <span class="text-[10px] font-bold text-white uppercase tracking-widest"><%= user.username %></span>
+                  </div>
+               </div>
+            </header>
+
+            <div id="content-scroll" class="flex-1 overflow-y-auto custom-scrollbar">
+                <main id="content" class="transition-opacity duration-500 opacity-100">
+               <!-- Content injection point -->
+               <div class="p-12 lg:p-16 max-w-7xl mx-auto">

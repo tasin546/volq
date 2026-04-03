@@ -1,0 +1,48 @@
+<!doctype html>
+<html class="h-full bg-[#111114]">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %> | 404</title>
+    <link href="/assets/tailwind.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+        }
+        body { font-family: 'Public Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#111114] h-full flex items-center justify-center p-6 overflow-hidden">
+    <!-- Background Glows -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none">
+        <div class="absolute top-[10%] left-[15%] w-[40rem] h-[40rem] bg-blue-600/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[10%] right-[15%] w-[40rem] h-[40rem] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" style="animation-delay: 2s;"></div>
+    </div>
+
+    <div class="relative z-10 text-center max-w-2xl">
+        <div class="mb-12 relative inline-block">
+             <h1 class="text-[12rem] font-black text-white/5 leading-none tracking-tighter select-none">404</h1>
+             <div class="absolute inset-0 flex items-center justify-center">
+                 <div class="liquid-glass border border-white/5 py-4 px-10 rounded-[2rem] shadow-2xl">
+                    <span class="text-3xl font-black text-white uppercase tracking-widest">Signal Lost</span>
+                 </div>
+             </div>
+        </div>
+        
+        <p class="text-zinc-500 text-lg font-medium mb-12 max-w-md mx-auto leading-relaxed">
+            The coordinate path you provided does not exist within our secure infrastructure. The asset may have been decommissioned or relocated.
+        </p>
+
+        <a href="/" class="group relative inline-flex items-center gap-4 px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-[2rem] transition shadow-3xl shadow-blue-500/20 active:scale-95 overflow-hidden">
+            <span class="relative z-10 flex items-center gap-3">
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>
+                Return to Nexus
+            </span>
+            <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+        </a>
+    </div>
+</body>
+</html>
