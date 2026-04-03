@@ -292,10 +292,9 @@
         xhr.send(fd);
     };
 
-    // Download file via the NODE API
+    // Download file via the download proxy route
     function downloadFile(filename) {
-        const path = currentPath ? currentPath + '/' + filename : filename;
-        window.open(`/instance/${instanceId}/files/view/${filename}${currentPath ? '?path=' + currentPath : ''}`, '_blank');
+        window.open(`/instance/${instanceId}/files/download/${encodeURIComponent(filename)}${currentPath ? '?path=' + encodeURIComponent(currentPath) : ''}`, '_blank');
     }
 
     // Create archive of the volume

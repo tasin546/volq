@@ -660,6 +660,35 @@ router.post("/:id/folders/rename/:foldername/:newfoldername", async (req, res) =
   }
 });
 
+router.get("/:id/files/download/:filename", async (req, res) => {
+  const { id, filename } = req.params;
+  const volumePath = path.join(__dirname, "../volumes", id);
+  const subPath = req.query.path || "";
+
+  if (!id || !filename)
+    return res.status(400).json({ message: "No volume ID or filename" });
+
+  try {
+    const formattedPath = subPath ? subPath + "/" + filename : filename;
+    const filePath = safePath(volumePath, formattedPath);
+    const stats = await fs.stat(filePath);
+    if (!stats.isFile()) {
+      return res.status(400).json({ message: "Not a file" });
+    }
+    res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(filename)}"`);
+    res.setHeader("Content-Length", stats.size);
+    res.setHeader("Content-Type", "application/octet-stream");
+    const stream = fsSync.createReadStream(filePath);
+    stream.pipe(res);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      res.status(404).json({ message: "File not found" });
+    } else {
+      res.status(500).json({ message: err.message });
+    }
+  }
+});
+
 router.delete("/:id/files/delete/:filename", async (req, res) => {
   const { id, filename } = req.params;
   const volumePath = path.join(__dirname, "../volumes", id);

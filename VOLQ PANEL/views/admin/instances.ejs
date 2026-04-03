@@ -61,7 +61,7 @@
                                 </div>
                             </td>
                             <td class="px-8 py-6">
-                                <span class="px-3 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-[10px] font-bold text-zinc-400 uppercase tracking-tighter leading-none"><%= instance.InternalState %></span>
+                                <span class="px-3 py-1 bg-white/[0.03] border border-white/5 rounded-lg text-[10px] font-bold text-zinc-400 uppercase tracking-tighter leading-none"><%= instance.InternalState || instance.State || 'Unknown' %></span>
                             </td>
                             <td class="px-8 py-6">
                                 <span class="text-xs font-bold text-white"><%= instance.Node.name %></span>

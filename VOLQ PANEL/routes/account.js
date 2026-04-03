@@ -162,7 +162,7 @@ router.post("/verify-2fa", async (req, res) => {
             return res.status(401).send("User is not authenticated.");
         }
 
-        const { token } = req.body;
+        const token = (req.body.token || '').replace(/\s/g, '');
         const users = await db.get("users");
         const currentUser = users.find(
             (user) => user.username === req.user.username,

@@ -115,10 +115,23 @@ router.get('/instance/:id/archives/download/:archiveName', async (req, res) => {
             return res.status(500).send('Invalid node configuration');
         }
 
-        const downloadUrl = `http://Volq:${instance.Node.apiKey}@${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/download/${archiveName}`;
+        // Proxy the download through the panel to avoid auth issues
+        const response = await axios({
+            method: 'get',
+            url: `http://${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/download/${archiveName}`,
+            auth: {
+                username: 'Volq',
+                password: instance.Node.apiKey
+            },
+            responseType: 'stream'
+        });
 
-        // Redirect to the node's download endpoint
-        res.redirect(downloadUrl);
+        res.setHeader('Content-Disposition', `attachment; filename="${archiveName}"`);
+        res.setHeader('Content-Type', response.headers['content-type'] || 'application/octet-stream');
+        if (response.headers['content-length']) {
+            res.setHeader('Content-Length', response.headers['content-length']);
+        }
+        response.data.pipe(res);
 
     } catch (err) {
         console.error('Error downloading archive:', err);
@@ -150,10 +163,15 @@ router.post('/instance/:id/archives/create', async (req, res) => {
 
         const RequestData = {
             method: 'post',
-            url: `http://Volq:${instance.Node.apiKey}@${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/${instance.VolumeId}/create`,
+            url: `http://${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/${instance.VolumeId}/create`,
+            auth: {
+                username: 'Volq',
+                password: instance.Node.apiKey
+            },
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            timeout: 300000
         };
 
         const response = await axios(RequestData);
@@ -192,7 +210,11 @@ router.post('/instance/:id/archives/delete/:archiveName', async (req, res) => {
 
         const RequestData = {
             method: 'post',
-            url: `http://Volq:${instance.Node.apiKey}@${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/delete/${archiveName}`,
+            url: `http://${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/delete/${archiveName}`,
+            auth: {
+                username: 'Volq',
+                password: instance.Node.apiKey
+            },
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -234,7 +256,11 @@ router.post('/instance/:id/archives/rollback/:archiveName', async (req, res) => 
 
         const RequestData = {
             method: 'post',
-            url: `http://Volq:${instance.Node.apiKey}@${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/rollback/${instance.VolumeId}/${archiveName}`,
+            url: `http://${instance.Node.address}:${instance.Node.port}/archive/${instance.ContainerId}/archives/rollback/${instance.VolumeId}/${archiveName}`,
+            auth: {
+                username: 'Volq',
+                password: instance.Node.apiKey
+            },
             headers: {
                 'Content-Type': 'application/json'
             }

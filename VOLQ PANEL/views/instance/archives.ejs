@@ -56,6 +56,7 @@
                             <td class="px-8 py-6 text-[10px] font-bold text-zinc-600 uppercase tracking-[0.2em]"><%= arc.lastUpdated %></td>
                             <td class="px-8 py-6 text-right">
                                 <div class="flex justify-end gap-3">
+                                    <a href="/instance/<%= req.params.id %>/archives/download/<%= encodeURIComponent(arc.name) %>" class="px-6 py-2 bg-blue-600/10 hover:bg-blue-500 text-blue-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition active:scale-95 inline-block">Download</a>
                                     <button onclick="restoreArchive('<%= arc.name %>')" class="px-6 py-2 bg-white/5 hover:bg-white text-zinc-400 hover:text-black text-[9px] font-black uppercase tracking-widest rounded-xl transition active:scale-95">Rollback</button>
                                     <button onclick="deleteArchive('<%= arc.name %>')" class="px-6 py-2 bg-rose-600/10 hover:bg-rose-500 text-rose-500 hover:text-white text-[9px] font-black uppercase tracking-widest rounded-xl transition active:scale-95">Purge</button>
                                 </div>
@@ -96,26 +97,35 @@
         popup.classList.remove('hidden');
         popup.classList.add('flex');
         
+        let prog = 0;
+        const iv = setInterval(() => {
+            if(prog < 90) {
+                prog += Math.random() * 3;
+                bar.style.width = Math.min(prog, 90) + '%';
+                msg.textContent = `ARCHIVING DATA STREAM... ${Math.floor(prog)}%`;
+            }
+        }, 500);
+
         try {
             const res = await fetch(`/instance/<%= req.params.id %>/archives/create`, { method: 'POST' });
-            let prog = 0;
-            const iv = setInterval(() => {
-                if(prog < 95) {
-                    prog += Math.random() * 15;
-                    bar.style.width = Math.min(prog, 95) + '%';
-                    msg.textContent = `ARCHIVING DATA STREAM... ${Math.floor(prog)}%`;
-                }
-            }, 300);
+            clearInterval(iv);
 
             if(res.ok) {
-                setTimeout(() => {
-                    clearInterval(iv);
-                    bar.style.width = '100%';
-                    msg.textContent = 'RESTORE POINT CREATED';
-                    setTimeout(() => window.location.reload(), 1000);
-                }, 1500);
+                bar.style.width = '100%';
+                msg.textContent = 'RESTORE POINT CREATED';
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                const data = await res.json().catch(() => ({}));
+                bar.style.width = '0%';
+                msg.textContent = data.message || 'ARCHIVE CREATION FAILED';
+                setTimeout(() => { popup.classList.add('hidden'); popup.classList.remove('flex'); }, 3000);
             }
-        } catch(e) { popup.classList.add('hidden'); }
+        } catch(e) {
+            clearInterval(iv);
+            bar.style.width = '0%';
+            msg.textContent = 'CONNECTION ERROR';
+            setTimeout(() => { popup.classList.add('hidden'); popup.classList.remove('flex'); }, 3000);
+        }
     }
 
     async function restoreArchive(name) {

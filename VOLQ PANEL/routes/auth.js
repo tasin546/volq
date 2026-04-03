@@ -265,7 +265,7 @@ router.get("/2fa", async (req, res) => {
 });
 
 router.post("/2fa", async (req, res) => {
-  const { token } = req.body;
+  const token = (req.body.token || '').replace(/\s/g, '');
   const tempUser = req.session.tempUser;
 
   if (!tempUser) {
